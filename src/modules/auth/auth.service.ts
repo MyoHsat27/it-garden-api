@@ -8,10 +8,12 @@ import {
 import { TokenService } from './token.service';
 import { CryptoService } from './crypto.service';
 import { DataSource, QueryRunner } from 'typeorm';
-import { RegisterLearnerDto, RegisterUserDto } from './dto';
+import { RegisterUserDto } from './dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities';
-import { LearnersService } from '../learners/learners.service';
+import { StudentsService } from '../students/students.service';
+import { TeachersService } from '../teachers/teachers.service';
+import { AdminsService } from '../admins/admins.service';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +22,9 @@ export class AuthService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly usersService: UsersService,
-    private readonly learnersService: LearnersService,
+    private readonly studentsService: StudentsService,
+    private readonly teachersService: TeachersService,
+    private readonly adminsService: AdminsService,
     private readonly tokenService: TokenService,
     private readonly cryptoService: CryptoService,
   ) {}
@@ -60,27 +64,6 @@ export class AuthService {
     }
   }
 
-  async registerLearner(dto: RegisterLearnerDto) {
-    const createLearnerProfile = async (
-      user: User,
-      queryRunner: QueryRunner,
-    ) => {
-      await this.learnersService.create(
-        {
-          fullName: dto.fullName,
-          user: user,
-        },
-        queryRunner.manager,
-      );
-    };
-
-    const newUser = await this._registerUserWithProfile(
-      dto,
-      createLearnerProfile,
-    );
-
-    return this.login(newUser);
-  }
   async login(user: User) {
     if (!user) throw new UnauthorizedException('Unauthorized');
     const accessToken = await this.tokenService.createAccessToken(user);

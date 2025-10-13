@@ -1,0 +1,23 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
+import { UserDto } from 'src/modules/users/dto';
+import { Gender } from '@common';
+
+export class AdminDto {
+  @ApiProperty({ example: 1 })
+  @Expose()
+  id: number;
+
+  @ApiProperty({ example: 'John Doe' })
+  @Expose()
+  fullName: string;
+
+  @ApiProperty({ enum: Gender, example: Gender.MALE })
+  @Expose()
+  gender: Gender;
+
+  @ApiProperty({ type: UserDto })
+  @Expose()
+  @Type(() => UserDto)
+  user: UserDto[];
+}

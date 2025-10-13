@@ -9,10 +9,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Learner } from '../../learners/entities';
+import { Student } from 'src/modules/students/entities';
+import { UserRole } from '../enums';
+import { Teacher } from 'src/modules/teachers/entities';
+import { Admin } from 'src/modules/admins/entities';
 
 @Entity('users')
-@Index(['email', 'id', 'username'], { unique: true })
+@Index(['email'], { unique: true })
+@Index(['username'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -39,9 +43,6 @@ export class User {
   @Column({ name: 'is_email_verified', default: false })
   isEmailVerified: boolean;
 
-  @Column({ name: 'is_banned', default: false })
-  isBanned: boolean;
-
   @Column({ name: 'verify_email_token', type: 'varchar', nullable: true })
   @Exclude()
   verifyEmailToken: string | null;
@@ -58,6 +59,9 @@ export class User {
   @Exclude()
   passwordResetExpires: Date | null;
 
+  @Column({ type: 'enum', enum: UserRole, name: 'user_role' })
+  userRole: UserRole;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -68,6 +72,12 @@ export class User {
   @Exclude()
   deletedAt: Date;
 
-  @OneToOne(() => Learner, (learner) => learner.user)
-  learner: Learner;
+  @OneToOne(() => Student, (student) => student.user)
+  studentProfile: Student;
+
+  @OneToOne(() => Teacher, (teacher) => teacher.user)
+  teacherProfile: Teacher;
+
+  @OneToOne(() => Admin, (admin) => admin.user)
+  adminProfile: Admin;
 }

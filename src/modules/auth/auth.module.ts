@@ -11,8 +11,10 @@ import { VerificationService } from './verification.service';
 import { JwtStrategy, LocalStrategy, RefreshTokenStrategy } from './strategies';
 import { AuthHelper } from './helpers';
 import { UsersModule } from '../users';
-import { LearnersModule } from '../learners';
 import { NotificationsModule } from '../notifications';
+import { TeachersModule } from '../teachers/teachers.module';
+import { StudentsModule } from '../students';
+import { AdminsModule } from '../admins/admins.module';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { NotificationsModule } from '../notifications';
       inject: [ConfigService],
     }),
     UsersModule,
-    LearnersModule,
+    TeachersModule,
+    StudentsModule,
+    AdminsModule,
     NotificationsModule,
   ],
   controllers: [AuthController],
