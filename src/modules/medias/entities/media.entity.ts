@@ -1,4 +1,4 @@
-import { MediaType } from '@common';
+import { MediaType } from '../../../common';
 import {
   Entity,
   PrimaryGeneratedColumn,

@@ -10,9 +10,9 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
-import { Gender } from '@common';
-import { User } from 'src/modules/users/entities';
-import { Enrollment } from 'src/modules/enrollments/entities';
+import { Gender } from '../../../common';
+import { User } from '../../users/entities';
+import { Enrollment } from '../../enrollments/entities';
 import { StudentStatus } from '../enums';
 
 @Entity('students')

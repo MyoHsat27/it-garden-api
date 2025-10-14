@@ -8,8 +8,8 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-import { User } from 'src/modules/users/entities';
-import { Role } from 'src/modules/roles/entities';
+import { User } from '../../users/entities';
+import { Role } from '../../roles/entities';
 import { AdminStatus } from '../enums';
 
 @Entity('admins')

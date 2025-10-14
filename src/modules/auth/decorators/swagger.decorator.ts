@@ -13,36 +13,7 @@ import {
 import { AuthenticatedResponseDto } from '../dto/auth-response.dto';
 import { LoginUserDto } from '../dto/login.dto';
 import { ValidateOtpDto } from '../dto/validate-otp.dto';
-import { RegisterLearnerDto } from '../dto';
-import { commonErrorResponses } from '@common';
-
-export function RegisterLearnersDecorator() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Learner registration',
-      description:
-        'This endpoint allows new learners to create an account. Learners provide an email and password which are then stored in the database. If the operation is successful, a new JWT token is created for the learner and returned in a cookie.',
-    }),
-    ApiBody({ type: RegisterLearnerDto }),
-    ApiCreatedResponse({
-      description: 'The learner has been successfully created.',
-      type: AuthenticatedResponseDto,
-      headers: {
-        'Set-Cookie': {
-          description:
-            'Contains the refresh token. HttpOnly, Secure, SameSite=Strict.',
-          schema: {
-            type: 'string',
-            example:
-              'refresh_token=your-long-refresh-token; Path=/; HttpOnly; Secure; SameSite=Strict',
-          },
-        },
-      },
-    }),
-    ApiBadRequestResponse(commonErrorResponses.badRequest),
-    ApiConflictResponse(commonErrorResponses.conflictResponse),
-  );
-}
+import { commonErrorResponses } from '../../../common';
 
 export function LoginUsersDecorator() {
   return applyDecorators(

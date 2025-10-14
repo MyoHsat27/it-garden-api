@@ -2,13 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Media } from "./entities";
-import { MediaType } from "@app/common";
-import { StorageService } from "src/infrastructure";
-import * as sharp from "sharp";
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Media } from './entities';
+import * as sharp from 'sharp';
+import { StorageService } from '../../infrastructure';
+import { MediaType } from '../../common';
 
 @Injectable()
 export class MediasService {
@@ -22,9 +22,9 @@ export class MediasService {
     type: MediaType,
     altText?: string,
   ): Promise<Media> {
-    if (!file) throw new BadRequestException("File is required.");
+    if (!file) throw new BadRequestException('File is required.');
 
-    const { url } = await this.storageService.upload(file, "avatars");
+    const { url } = await this.storageService.upload(file, 'avatars');
     const { width, height, size } = await sharp(file.buffer).metadata();
 
     const newMedia = this.mediaRepo.create({

@@ -1,5 +1,5 @@
-import { Assignment } from 'src/modules/assignments/entities';
-import { Enrollment } from 'src/modules/enrollments/entities';
+import { Assignment } from '../../assignments/entities';
+import { Enrollment } from '../../enrollments/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,

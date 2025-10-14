@@ -1,7 +1,7 @@
-import { Batch } from 'src/modules/batches/entities';
-import { Classroom } from 'src/modules/classrooms/entities';
-import { Teacher } from 'src/modules/teachers/entities';
-import { TimeSlot } from 'src/modules/timeslots/entities';
+import { Batch } from '../../batches/entities';
+import { Classroom } from '../../classrooms/entities';
+import { Teacher } from '../../teachers/entities';
+import { TimeSlot } from '../../time-slots/entities';
 import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('timetables')

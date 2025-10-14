@@ -9,20 +9,13 @@ import {
   RequestLoggingMiddleware,
   APP_RATE_LIMIT,
   APP_RATE_TTL,
-} from '@common';
+} from './common';
 import {
   BullBoardModule,
   BullMQModule,
   QueuesModule,
   TypeOrmModule,
 } from './infrastructure';
-import {
-  AuthModule,
-  HealthModule,
-  MediasModule,
-  NotificationsModule,
-  UsersModule,
-} from './modules';
 import { AdminsModule } from './modules/admins/admins.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
 import { RolesModule } from './modules/roles/roles.module';
@@ -30,16 +23,22 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { BatchesModule } from './modules/batches/batches.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { ClassroomsModule } from './modules/classrooms/classrooms.module';
-import { TimeslotsModule } from './modules/timeslots/time-slots.module';
 import { TimetablesModule } from './modules/timetables/timetables.module';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
 import { SubmissionsModule } from './modules/submissions/submissions.module';
-import { AttedanceRecordsModule } from './modules/attendance-records/attedance-records.module';
+import { AttendanceRecordsModule } from './modules/attendance-records/attendance-records.module';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { ExamsModule } from './modules/exams/exams.module';
 import { ExamResultsModule } from './modules/exam-results/exam-results.module';
 import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
+import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { MediasModule } from './modules/medias/medias.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { StudentsModule } from './modules/students/students.module';
 
 @Module({
   imports: [
@@ -64,10 +63,9 @@ import { PaymentsModule } from './modules/payments/payments.module';
 
     // Common modules
     CommonModule,
-
-    // Feature modules
     HealthModule,
 
+    // Feature modules
     AuthModule,
 
     UsersModule,
@@ -77,6 +75,8 @@ import { PaymentsModule } from './modules/payments/payments.module';
     NotificationsModule,
 
     AdminsModule,
+
+    StudentsModule,
 
     TeachersModule,
 
@@ -90,7 +90,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 
     ClassroomsModule,
 
-    TimeslotsModule,
+    TimeSlotsModule,
 
     TimetablesModule,
 
@@ -98,7 +98,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 
     SubmissionsModule,
 
-    AttedanceRecordsModule,
+    AttendanceRecordsModule,
 
     EnrollmentsModule,
 

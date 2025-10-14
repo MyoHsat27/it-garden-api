@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "./entities";
-import { UpdateUserDto } from "./dto";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities';
+import { UpdateUserDto } from './dto';
 
 export type GoogleProfile = {
   email: string;
@@ -36,10 +36,6 @@ export class UsersService {
     return user;
   }
 
-  async findByGoogleId(googleId: string): Promise<User | null> {
-    return await this.userRepo.findOneBy({ googleId });
-  }
-
   async create(email: string, password: string): Promise<User> {
     const user = this.userRepo.create({ email, password });
     return await this.userRepo.save(user);
@@ -60,7 +56,7 @@ export class UsersService {
   ): Promise<User> {
     const user = await this.userRepo.preload({ id, ...attrs });
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException('User not found');
     }
     await this.userRepo.save(user);
 
@@ -70,7 +66,7 @@ export class UsersService {
   async remove(id: number): Promise<User> {
     const user = await this.findById(id);
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException('User not found');
     }
     return await this.userRepo.remove(user);
   }

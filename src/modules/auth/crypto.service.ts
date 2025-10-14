@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomBytes, scrypt as _scrypt, createHash } from 'crypto';
 import { promisify } from 'util';
 import { UsersService } from '../users/users.service';
-import { slugifyString } from '@common';
+import { slugifyString } from '../../common';
 
 const scrypt = promisify(_scrypt);
 

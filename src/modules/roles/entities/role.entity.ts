@@ -1,5 +1,5 @@
-import { Admin } from 'src/modules/admins/entities';
-import { Permission } from 'src/modules/permissions/entities';
+import { Admin } from '../../admins/entities';
+import { Permission } from '../../permissions/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,

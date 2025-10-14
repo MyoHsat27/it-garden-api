@@ -1,5 +1,5 @@
-import { Enrollment } from 'src/modules/enrollments/entities';
-import { Exam } from 'src/modules/exams/entities';
+import { Enrollment } from '../../enrollments/entities';
+import { Exam } from '../../exams/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,

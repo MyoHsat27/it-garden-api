@@ -1,9 +1,9 @@
-import { AttendanceRecord } from 'src/modules/attendance-records/entities';
-import { Batch } from 'src/modules/batches/entities';
-import { ExamResult } from 'src/modules/exam-results/entities';
-import { Payment } from 'src/modules/payments/entities';
-import { Student } from 'src/modules/students/entities';
-import { Submission } from 'src/modules/submissions/entities';
+import { AttendanceRecord } from '../../attendance-records/entities';
+import { Batch } from '../../batches/entities';
+import { ExamResult } from '../../exam-results/entities';
+import { Payment } from '../../payments/entities';
+import { Student } from '../../students/entities';
+import { Submission } from '../../submissions/entities';
 import {
   Column,
   Entity,

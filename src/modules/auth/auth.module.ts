@@ -10,11 +10,11 @@ import { PassportModule } from '@nestjs/passport';
 import { VerificationService } from './verification.service';
 import { JwtStrategy, LocalStrategy, RefreshTokenStrategy } from './strategies';
 import { AuthHelper } from './helpers';
-import { UsersModule } from '../users';
-import { NotificationsModule } from '../notifications';
 import { TeachersModule } from '../teachers/teachers.module';
-import { StudentsModule } from '../students';
 import { AdminsModule } from '../admins/admins.module';
+import { UsersModule } from '../users/users.module';
+import { StudentsModule } from '../students/students.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [

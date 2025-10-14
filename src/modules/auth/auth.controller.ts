@@ -14,12 +14,11 @@ import {
   LoginUsersDecorator,
   LogoutUsersDecorator,
   RefreshTokenDecorator,
-  RegisterLearnersDecorator,
   VerifyEmailSetupDecorator,
 } from './decorators';
 import { Throttle } from '@nestjs/throttler';
 import { VerificationService } from './verification.service';
-import { RegisterLearnerDto, ValidateOtpDto } from './dto';
+import { ValidateOtpDto } from './dto';
 import { AuthHelper } from './helpers';
 import { Request, Response } from 'express';
 import { JwtAuthGuard, LocalAuthGuard, RefreshTokenGuard } from './guards';
@@ -39,18 +38,6 @@ export class AuthController {
     const tokens = await authPromise;
     this.authHelper.setRefreshTokenCookie(res, tokens.refreshToken);
     return { accessToken: tokens.accessToken };
-  }
-
-  @Post('register/learner')
-  @RegisterLearnersDecorator()
-  async registerLearner(
-    @Body() body: RegisterLearnerDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    return await this.handleAuthResponse(
-      res,
-      this.authService.registerLearner(body),
-    );
   }
 
   @Post('login')

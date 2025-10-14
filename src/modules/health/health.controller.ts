@@ -1,4 +1,4 @@
-import { HealthCheckDto } from '@common';
+import { HealthCheckDto } from '../../common';
 import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';

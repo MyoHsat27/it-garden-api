@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { UserDto } from 'src/modules/users/dto';
-import { Gender } from '@common';
+import { UserDto } from '../../users/dto';
+import { Gender } from '../../../common';
 
 export class AdminDto {
   @ApiProperty({ example: 1 })

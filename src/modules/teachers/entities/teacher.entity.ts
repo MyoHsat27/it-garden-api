@@ -10,11 +10,10 @@ import {
   OneToMany,
   ManyToMany,
 } from 'typeorm';
-import { Gender } from '@common';
-import { User } from 'src/modules/users/entities';
-import { Timetable } from 'src/modules/timetables/entities';
-import { Assignment } from 'src/modules/assignments/entities';
-import { Batch } from 'src/modules/batches/entities';
+import { Gender } from '../../../common';
+import { User } from '../../users/entities';
+import { Timetable } from '../../timetables/entities';
+import { Batch } from '../../batches/entities';
 
 @Entity('teachers')
 export class Teacher {

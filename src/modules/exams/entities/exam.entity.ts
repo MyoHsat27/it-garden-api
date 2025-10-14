@@ -1,5 +1,5 @@
-import { Batch } from 'src/modules/batches/entities';
-import { ExamResult } from 'src/modules/exam-results/entities';
+import { Batch } from '../../batches/entities';
+import { ExamResult } from '../../exam-results/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,

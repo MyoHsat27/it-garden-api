@@ -1,5 +1,5 @@
-import { Batch } from 'src/modules/batches/entities';
-import { Submission } from 'src/modules/submissions/entities/submission.entity';
+import { Batch } from '../../batches/entities';
+import { Submission } from '../../submissions/entities/submission.entity';
 import {
   Column,
   Entity,

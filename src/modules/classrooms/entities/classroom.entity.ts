@@ -1,4 +1,4 @@
-import { Timetable } from 'src/modules/timetables/entities';
+import { Timetable } from '../../timetables/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,

@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { EmailProducer } from "src/infrastructure/queues/email/email.producer";
+import { Injectable } from '@nestjs/common';
+import { EmailProducer } from '../../infrastructure/queues/email';
 
 @Injectable()
 export class NotificationsService {

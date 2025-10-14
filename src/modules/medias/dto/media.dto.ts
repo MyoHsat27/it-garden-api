@@ -1,14 +1,13 @@
-import { IsString } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
-import { MediaType } from "@app/common";
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import { MediaType } from '../../../common';
 
 export class MediaDto {
   @ApiProperty({ example: 1 })
   @Expose()
   id: number;
 
-  @ApiProperty({ example: "https://space.com/path/to/image.png" })
+  @ApiProperty({ example: 'https://space.com/path/to/image.png' })
   @Expose()
   url: string;
 
@@ -16,7 +15,7 @@ export class MediaDto {
   @Expose()
   type: MediaType;
 
-  @ApiProperty({ required: false, example: "A vibrant abstract painting." })
+  @ApiProperty({ required: false, example: 'A vibrant abstract painting.' })
   @Expose()
   altText: string;
 }

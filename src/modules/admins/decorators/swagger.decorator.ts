@@ -7,4 +7,3 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { commonErrorResponses } from '@common';

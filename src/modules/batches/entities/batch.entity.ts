@@ -1,10 +1,10 @@
-import { Announcement } from 'src/modules/announcements/entities';
-import { Assignment } from 'src/modules/assignments/entities';
-import { Course } from 'src/modules/courses/entities';
-import { Enrollment } from 'src/modules/enrollments/entities';
-import { Exam } from 'src/modules/exams/entities';
-import { Teacher } from 'src/modules/teachers/entities';
-import { Timetable } from 'src/modules/timetables/entities';
+import { Announcement } from '../../announcements/entities';
+import { Assignment } from '../../assignments/entities';
+import { Course } from '../../courses/entities';
+import { Enrollment } from '../../enrollments/entities';
+import { Exam } from '../../exams/entities';
+import { Teacher } from '../../teachers/entities';
+import { Timetable } from '../../timetables/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,

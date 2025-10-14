@@ -9,10 +9,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Student } from 'src/modules/students/entities';
 import { UserRole } from '../enums';
-import { Teacher } from 'src/modules/teachers/entities';
-import { Admin } from 'src/modules/admins/entities';
+import { Student } from '../../students/entities';
+import { Teacher } from '../../teachers/entities';
+import { Admin } from '../../admins/entities';
 
 @Entity('users')
 @Index(['email'], { unique: true })

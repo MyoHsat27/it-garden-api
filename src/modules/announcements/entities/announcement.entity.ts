@@ -1,4 +1,4 @@
-import { Batch } from 'src/modules/batches/entities';
+import { Batch } from '../../batches/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,
