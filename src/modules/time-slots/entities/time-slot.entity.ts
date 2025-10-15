@@ -1,11 +1,5 @@
 import { Timetable } from '../../timetables/entities';
-import {
-  Column,
-  Entity,
-  Index,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('time_slots')
 export class TimeSlot {

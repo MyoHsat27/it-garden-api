@@ -45,10 +45,14 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('MayMyan API')
-    .setDescription('MayMyan API Documentation')
+    .setTitle('IT Garden API')
+    .setDescription('IT Garden API Documentation')
     .setVersion('1.0')
-    .setContact('MayMyan', 'https://www.maymyan.org/', 'maymyan.edu@gmail.com')
+    .setContact(
+      'IT Garden',
+      'https://www.itgarden.org/',
+      'itgarden.edu@gmail.com',
+    )
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build();
 

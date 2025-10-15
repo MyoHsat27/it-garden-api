@@ -1,34 +1,70 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { ClassroomsService } from './classrooms.service';
-import { CreateClassroomDto } from './dto/create-classroom.dto';
-import { UpdateClassroomDto } from './dto/update-classroom.dto';
+import {
+  CreateClassroomDto,
+  UpdateClassroomDto,
+  ClassroomResponseDto,
+} from './dto';
+import {
+  CreateClassroomDecorator,
+  GetAllClassroomsDecorator,
+  GetClassroomByIdDecorator,
+  UpdateClassroomDecorator,
+  DeleteClassroomDecorator,
+} from './decorators/swagger.decorator';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('classrooms')
+@UseGuards(JwtAuthGuard)
 export class ClassroomsController {
   constructor(private readonly classroomsService: ClassroomsService) {}
 
   @Post()
-  create(@Body() createClassroomDto: CreateClassroomDto) {
-    return this.classroomsService.create(createClassroomDto);
+  @CreateClassroomDecorator()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() dto: CreateClassroomDto): Promise<ClassroomResponseDto> {
+    return await this.classroomsService.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.classroomsService.findAll();
+  @GetAllClassroomsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAll(): Promise<ClassroomResponseDto[]> {
+    return await this.classroomsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.classroomsService.findOne(+id);
+  @GetClassroomByIdDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: number): Promise<ClassroomResponseDto> {
+    return await this.classroomsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClassroomDto: UpdateClassroomDto) {
-    return this.classroomsService.update(+id, updateClassroomDto);
+  @UpdateClassroomDecorator()
+  @HttpCode(HttpStatus.OK)
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateClassroomDto,
+  ): Promise<ClassroomResponseDto> {
+    return await this.classroomsService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.classroomsService.remove(+id);
+  @DeleteClassroomDecorator()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: number): Promise<void> {
+    return await this.classroomsService.remove(id);
   }
 }

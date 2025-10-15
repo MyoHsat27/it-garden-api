@@ -2,46 +2,62 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
-  Param,
+  Put,
   Delete,
+  Param,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AttendanceRecordsService } from './attendance-records.service';
-import { CreateAttendanceRecordDto } from './dto/create-attendance-record.dto';
-import { UpdateAttendanceRecordDto } from './dto/update-attendance-record.dto';
+import { CreateAttendanceRecordDto, UpdateAttendanceRecordDto } from './dto';
+import {
+  CreateAttendanceRecordDecorator,
+  DeleteAttendanceRecordDecorator,
+  GetAllAttendanceRecordsDecorator,
+  GetAttendanceRecordByIdDecorator,
+  UpdateAttendanceRecordDecorator,
+} from './decorators';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('attendance-records')
+@UseGuards(JwtAuthGuard)
 export class AttendanceRecordsController {
-  constructor(
-    private readonly attendanceRecordsService: AttendanceRecordsService,
-  ) {}
+  constructor(private readonly service: AttendanceRecordsService) {}
 
   @Post()
-  create(@Body() createAttendanceRecordDto: CreateAttendanceRecordDto) {
-    return this.attendanceRecordsService.create(createAttendanceRecordDto);
+  @CreateAttendanceRecordDecorator()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() dto: CreateAttendanceRecordDto) {
+    return this.service.create(dto);
   }
 
   @Get()
+  @GetAllAttendanceRecordsDecorator()
+  @HttpCode(HttpStatus.OK)
   findAll() {
-    return this.attendanceRecordsService.findAll();
+    return this.service.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.attendanceRecordsService.findOne(+id);
+  @GetAttendanceRecordByIdDecorator()
+  @HttpCode(HttpStatus.OK)
+  findOne(@Param('id') id: number) {
+    return this.service.findOne(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAttendanceRecordDto: UpdateAttendanceRecordDto,
-  ) {
-    return this.attendanceRecordsService.update(+id, updateAttendanceRecordDto);
+  @Put(':id')
+  @UpdateAttendanceRecordDecorator()
+  @HttpCode(HttpStatus.OK)
+  update(@Param('id') id: number, @Body() dto: UpdateAttendanceRecordDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attendanceRecordsService.remove(+id);
+  @DeleteAttendanceRecordDecorator()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: number) {
+    return this.service.remove(id);
   }
 }

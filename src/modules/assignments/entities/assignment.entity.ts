@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Teacher } from '../../teachers/entities';
 
 @Entity('assignments')
 export class Assignment {
@@ -22,7 +23,13 @@ export class Assignment {
   description: string;
 
   @Column({ type: 'timestamp' })
-  deadline: Date;
+  dueDate: Date;
+
+  @Column({ nullable: true })
+  attachmentUrl?: string;
+
+  @ManyToOne(() => Teacher, (teacher) => teacher.assignments)
+  teacher: Teacher;
 
   @ManyToOne(() => Batch, (batch) => batch.assignments, { onDelete: 'CASCADE' })
   batch: Batch;

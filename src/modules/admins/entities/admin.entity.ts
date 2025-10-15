@@ -7,10 +7,11 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities';
 import { Role } from '../../roles/entities';
-import { AdminStatus } from '../enums';
+import { Gender } from '../../../common';
 
 @Entity('admins')
 export class Admin {
@@ -26,8 +27,17 @@ export class Admin {
   @Column({ type: 'varchar' })
   address: string;
 
-  @Column({ type: 'enum', enum: AdminStatus, default: AdminStatus.ACTIVE })
-  status: AdminStatus;
+  @Column({ type: 'enum', enum: Gender, nullable: true })
+  gender: Gender;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 
   @OneToOne(() => User, (user) => user.adminProfile, {
     cascade: true,
@@ -38,10 +48,4 @@ export class Admin {
 
   @ManyToOne(() => Role, (role) => role.admins)
   role: Role;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
 }

@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { CoursesRepository } from './courses.repository';
+import { CreateCourseDto, UpdateCourseDto, CourseResponseDto } from './dto';
 
 @Injectable()
 export class CoursesService {
-  create(createCourseDto: CreateCourseDto) {
-    return 'This action adds a new course';
+  constructor(private readonly repository: CoursesRepository) {}
+
+  async create(dto: CreateCourseDto): Promise<CourseResponseDto> {
+    const course = await this.repository.create(dto);
+    return plainToInstance(CourseResponseDto, course);
   }
 
-  findAll() {
-    return `This action returns all courses`;
+  async findAll(): Promise<CourseResponseDto[]> {
+    const courses = await this.repository.findAll();
+    return plainToInstance(CourseResponseDto, courses);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} course`;
+  async findOne(id: number): Promise<CourseResponseDto> {
+    const course = await this.repository.findById(id);
+    if (!course) throw new NotFoundException(`Course with id ${id} not found`);
+    return plainToInstance(CourseResponseDto, course);
   }
 
-  update(id: number, updateCourseDto: UpdateCourseDto) {
-    return `This action updates a #${id} course`;
+  async update(id: number, dto: UpdateCourseDto): Promise<CourseResponseDto> {
+    const course = await this.repository.findById(id);
+    if (!course) throw new NotFoundException(`Course with id ${id} not found`);
+
+    Object.assign(course, dto);
+    const updated = await this.repository.update(course);
+    return plainToInstance(CourseResponseDto, updated);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} course`;
+  async remove(id: number): Promise<void> {
+    const affected = await this.repository.delete(id);
+    if (affected === 0) {
+      throw new NotFoundException(`Course with id ${id} not found`);
+    }
   }
 }

@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { TokenService } from './token.service';
-import { CryptoService } from './crypto.service';
 import { DataSource, QueryRunner } from 'typeorm';
 import { RegisterUserDto } from './dto';
 import { UsersService } from '../users/users.service';
@@ -14,6 +13,7 @@ import { User } from '../users/entities';
 import { StudentsService } from '../students/students.service';
 import { TeachersService } from '../teachers/teachers.service';
 import { AdminsService } from '../admins/admins.service';
+import { CryptoHelper } from '../../common';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +26,6 @@ export class AuthService {
     private readonly teachersService: TeachersService,
     private readonly adminsService: AdminsService,
     private readonly tokenService: TokenService,
-    private readonly cryptoService: CryptoService,
   ) {}
 
   private async _registerUserWithProfile(
@@ -45,8 +44,8 @@ export class AuthService {
 
       const newUser = new User();
       newUser.email = dto.email.toLowerCase();
-      newUser.password = await this.cryptoService.hashPassword(dto.password);
-      newUser.username = await this.cryptoService.generateUniqueUsername(
+      newUser.password = await CryptoHelper.hashPassword(dto.password);
+      newUser.username = await this.usersService.generateUniqueUsername(
         dto.fullName,
       );
       const savedUser = await queryRunner.manager.save(newUser);
@@ -69,7 +68,7 @@ export class AuthService {
     const accessToken = await this.tokenService.createAccessToken(user);
     const refreshToken = await this.tokenService.createRefreshToken(user);
 
-    const hashedRefreshToken = this.cryptoService.hashToken(refreshToken);
+    const hashedRefreshToken = CryptoHelper.hashToken(refreshToken);
 
     await this.usersService.update(user.id, {
       refreshToken: hashedRefreshToken,
@@ -88,7 +87,7 @@ export class AuthService {
       throw new NotFoundException('No user found with this email address.');
     }
 
-    const isValidPassword = await this.cryptoService.validatePassword(
+    const isValidPassword = await CryptoHelper.validatePassword(
       password,
       user.password || '',
     );

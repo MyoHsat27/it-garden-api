@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTimeSlotDto } from './dto/create-time-slot.dto';
-import { UpdateTimeSlotDto } from './dto/update-time-slot.dto';
+import { plainToInstance } from 'class-transformer';
+import { TimeSlotsRepository } from './time-slots.repository';
+import {
+  CreateTimeSlotDto,
+  UpdateTimeSlotDto,
+  TimeSlotResponseDto,
+} from './dto';
 
 @Injectable()
 export class TimeSlotsService {
-  create(createTimeSlotDto: CreateTimeSlotDto) {
-    return 'This action adds a new timeSlot';
+  constructor(private readonly repository: TimeSlotsRepository) {}
+
+  async create(dto: CreateTimeSlotDto): Promise<TimeSlotResponseDto> {
+    const timeSlot = await this.repository.createTimeSlot(dto);
+    return plainToInstance(TimeSlotResponseDto, timeSlot);
   }
 
-  findAll() {
-    return `This action returns all timeSlots`;
+  async findAll(): Promise<TimeSlotResponseDto[]> {
+    const timeSlots = await this.repository.findAll();
+    return plainToInstance(TimeSlotResponseDto, timeSlots);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} timeSlot`;
+  async findOne(id: number): Promise<TimeSlotResponseDto> {
+    const timeSlot = await this.repository.findById(id);
+    return plainToInstance(TimeSlotResponseDto, timeSlot);
   }
 
-  update(id: number, updateTimeSlotDto: UpdateTimeSlotDto) {
-    return `This action updates a #${id} time slot`;
+  async update(
+    id: number,
+    dto: UpdateTimeSlotDto,
+  ): Promise<TimeSlotResponseDto> {
+    const updated = await this.repository.updateTimeSlot(id, dto);
+    return plainToInstance(TimeSlotResponseDto, updated);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} time slot`;
+  async remove(id: number): Promise<void> {
+    await this.repository.deleteTimeSlot(id);
   }
 }

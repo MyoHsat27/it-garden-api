@@ -3,11 +3,12 @@ import { TimeSlotsService } from './time-slots.service';
 import { TimeSlotsController } from './time-slots.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TimeSlot } from './entities';
+import { TimeSlotsRepository } from './time-slots.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TimeSlot])],
   controllers: [TimeSlotsController],
-  providers: [TimeSlotsService],
-  exports: [TimeSlotsService],
+  providers: [TimeSlotsService, TimeSlotsRepository],
+  exports: [TimeSlotsService, TimeSlotsRepository],
 })
 export class TimeSlotsModule {}

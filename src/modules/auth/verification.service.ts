@@ -5,11 +5,11 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CryptoService } from './crypto.service';
 import { ValidateOtpDto } from './dto';
 import { User } from '../users/entities';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CryptoHelper } from '../../common';
 
 @Injectable()
 export class VerificationService {
@@ -17,13 +17,12 @@ export class VerificationService {
 
   constructor(
     private readonly usersService: UsersService,
-    private readonly cryptoService: CryptoService,
     private readonly notificationService: NotificationsService,
   ) {}
 
   async sendEmailVerification(user: User): Promise<{ message: string }> {
     const [generatedOtp, hashedOtp] =
-      await this.cryptoService.generateAndHashOtp6Figures();
+      await CryptoHelper.generateAndHashOtp6Figures();
 
     if (user.isEmailVerified === true) {
       throw new BadRequestException(
@@ -78,7 +77,7 @@ export class VerificationService {
       );
     }
 
-    const isOtpValid = await this.cryptoService.validateOtp(
+    const isOtpValid = await CryptoHelper.validateOtp(
       otp,
       user.verifyEmailToken,
     );

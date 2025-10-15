@@ -1,34 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { TimetablesService } from './timetables.service';
-import { CreateTimetableDto } from './dto/create-timetable.dto';
-import { UpdateTimetableDto } from './dto/update-timetable.dto';
+import { CreateTimetableDto, UpdateTimetableDto } from './dto';
+import { TimetableResponseDto } from './dto/timetable-response.dto';
+import {
+  CreateTimetableDecorator,
+  GetAllTimetablesDecorator,
+  GetTimetableByIdDecorator,
+  UpdateTimetableDecorator,
+  DeleteTimetableDecorator,
+} from './decorators/swagger.decorator';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('timetables')
+@UseGuards(JwtAuthGuard)
 export class TimetablesController {
-  constructor(private readonly timetablesService: TimetablesService) {}
+  constructor(private readonly service: TimetablesService) {}
 
   @Post()
-  create(@Body() createTimetableDto: CreateTimetableDto) {
-    return this.timetablesService.create(createTimetableDto);
+  @CreateTimetableDecorator()
+  async create(@Body() dto: CreateTimetableDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.timetablesService.findAll();
+  @GetAllTimetablesDecorator()
+  async findAll(): Promise<TimetableResponseDto[]> {
+    return this.service.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.timetablesService.findOne(+id);
+  @GetTimetableByIdDecorator()
+  async findOne(@Param('id') id: number) {
+    return this.service.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTimetableDto: UpdateTimetableDto) {
-    return this.timetablesService.update(+id, updateTimetableDto);
+  @Put(':id')
+  @UpdateTimetableDecorator()
+  async update(@Param('id') id: number, @Body() dto: UpdateTimetableDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.timetablesService.remove(+id);
+  @DeleteTimetableDecorator()
+  async remove(@Param('id') id: number): Promise<void> {
+    return this.service.remove(id);
   }
 }

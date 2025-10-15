@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../../../../modules/users/entities';
 import { Admin } from '../../../../modules/admins/entities';
 import { Role } from '../../../../modules/roles/entities';
-import * as bcrypt from 'bcrypt';
+import { CryptoHelper } from '../../../../common';
 
 export default class AdminSeeder implements Seeder {
   public async run(
@@ -24,7 +24,7 @@ export default class AdminSeeder implements Seeder {
     const user = await userFactory.make({
       username: 'superadmin',
       email,
-      password: await bcrypt.hash('SuperAdmin@123', 10),
+      password: await CryptoHelper.hashPassword('SuperAdmin@123'),
       isEmailVerified: true,
     });
     await userRepo.save(user);

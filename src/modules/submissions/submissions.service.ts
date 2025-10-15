@@ -1,26 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { SubmissionsRepository } from './submissions.respository';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { UpdateSubmissionDto } from './dto/update-submission.dto';
+import { plainToInstance } from 'class-transformer';
+import { SubmissionResponseDto } from './dto/submission-response.dto';
 
 @Injectable()
 export class SubmissionsService {
-  create(createSubmissionDto: CreateSubmissionDto) {
-    return 'This action adds a new submission';
+  constructor(private readonly repository: SubmissionsRepository) {}
+
+  async create(dto: CreateSubmissionDto) {
+    const course = await this.repository.create(dto);
+    return plainToInstance(SubmissionResponseDto, course);
   }
 
-  findAll() {
-    return `This action returns all submissions`;
+  async findAll() {
+    const submissions = await this.repository.findAll();
+    return plainToInstance(SubmissionResponseDto, submissions);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} submission`;
+  async findOne(id: number) {
+    const submission = await this.repository.findById(id);
+    if (!submission)
+      throw new NotFoundException(`Submission with id ${id} not found`);
+    return plainToInstance(SubmissionResponseDto, submission);
   }
 
-  update(id: number, updateSubmissionDto: UpdateSubmissionDto) {
-    return `This action updates a #${id} submission`;
+  async update(id: number, dto: UpdateSubmissionDto) {
+    const submission = await this.repository.findById(id);
+    if (!submission)
+      throw new NotFoundException(`Submission with id ${id} not found`);
+
+    Object.assign(submission, dto);
+    const updated = await this.repository.update(submission);
+    return plainToInstance(SubmissionResponseDto, updated);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} submission`;
+  async remove(id: number): Promise<void> {
+    const affected = await this.repository.delete(id);
+    if (affected === 0) {
+      throw new NotFoundException(`Submission with id ${id} not found`);
+    }
   }
 }

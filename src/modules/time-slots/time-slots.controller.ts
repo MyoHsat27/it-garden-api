@@ -2,44 +2,55 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
   Param,
   Delete,
+  Body,
+  UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { TimeSlotsService } from './time-slots.service';
-import { CreateTimeSlotDto } from './dto/create-time-slot.dto';
-import { UpdateTimeSlotDto } from './dto/update-time-slot.dto';
+import { CreateTimeSlotDto, UpdateTimeSlotDto } from './dto';
+import {
+  CreateTimeSlotDecorator,
+  GetAllTimeSlotsDecorator,
+  GetTimeSlotByIdDecorator,
+  UpdateTimeSlotDecorator,
+  DeleteTimeSlotDecorator,
+} from './decorators/swagger.decorator';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('time-slots')
+@UseGuards(JwtAuthGuard)
 export class TimeSlotsController {
-  constructor(private readonly timeSlotsService: TimeSlotsService) {}
+  constructor(private readonly service: TimeSlotsService) {}
 
   @Post()
-  create(@Body() createTimeSlotDto: CreateTimeSlotDto) {
-    return this.timeSlotsService.create(createTimeSlotDto);
+  @CreateTimeSlotDecorator()
+  async create(@Body() dto: CreateTimeSlotDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.timeSlotsService.findAll();
+  @GetAllTimeSlotsDecorator()
+  async findAll() {
+    return this.service.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.timeSlotsService.findOne(+id);
+  @GetTimeSlotByIdDecorator()
+  async findOne(@Param('id') id: number) {
+    return this.service.findOne(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateTimeSlotDto: UpdateTimeSlotDto,
-  ) {
-    return this.timeSlotsService.update(+id, updateTimeSlotDto);
+  @UpdateTimeSlotDecorator()
+  async update(@Param('id') id: number, @Body() dto: UpdateTimeSlotDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.timeSlotsService.remove(+id);
+  @DeleteTimeSlotDecorator()
+  async remove(@Param('id') id: number) {
+    return this.service.remove(id);
   }
 }

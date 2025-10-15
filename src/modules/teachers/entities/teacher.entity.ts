@@ -14,6 +14,7 @@ import { Gender } from '../../../common';
 import { User } from '../../users/entities';
 import { Timetable } from '../../timetables/entities';
 import { Batch } from '../../batches/entities';
+import { Assignment } from '../../assignments/entities';
 
 @Entity('teachers')
 export class Teacher {
@@ -23,8 +24,11 @@ export class Teacher {
   @Column({ name: 'full_name' })
   fullName: string;
 
-  @Column({ nullable: true })
-  age: number;
+  @Column({ type: 'varchar' })
+  phone: string;
+
+  @Column({ type: 'varchar' })
+  address: string;
 
   @Column({ type: 'enum', enum: Gender, nullable: true })
   gender: Gender;
@@ -47,6 +51,9 @@ export class Teacher {
 
   @ManyToMany(() => Batch, (batch) => batch.teachers)
   batches: Batch[];
+
+  @ManyToMany(() => Assignment, (assignment) => assignment.teacher)
+  assignments: Assignment[];
 
   @OneToMany(() => Timetable, (timetable) => timetable.teacher)
   timetables: Timetable[];

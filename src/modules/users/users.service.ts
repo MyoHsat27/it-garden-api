@@ -3,6 +3,9 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities';
 import { UpdateUserDto } from './dto';
+import { UserRole } from './enums';
+import { CryptoHelper, slugifyString } from '../../common';
+import { randomBytes } from 'crypto';
 
 export type GoogleProfile = {
   email: string;
@@ -36,8 +39,17 @@ export class UsersService {
     return user;
   }
 
-  async create(email: string, password: string): Promise<User> {
-    const user = this.userRepo.create({ email, password });
+  async create(dto: {
+    username: string;
+    email: string;
+    password: string;
+    userRole: UserRole;
+  }) {
+    const hashed = await CryptoHelper.hashPassword(dto.password);
+    const user = this.userRepo.create({
+      ...dto,
+      password: hashed,
+    });
     return await this.userRepo.save(user);
   }
 
@@ -69,5 +81,24 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     return await this.userRepo.remove(user);
+  }
+
+  async generateUniqueUsername(fullName: string): Promise<string> {
+    let username = slugifyString(fullName);
+
+    let existingUser = await this.findByUsername(username);
+
+    while (existingUser) {
+      const randomSuffix = randomBytes(2).toString('hex');
+      const newUsername = `${username}_${randomSuffix}`;
+
+      existingUser = await this.findByUsername(newUsername);
+
+      if (!existingUser) {
+        username = newUsername;
+      }
+    }
+
+    return username;
   }
 }

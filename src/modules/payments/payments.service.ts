@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PaymentsRepository } from './payments.repository';
+import { CreatePaymentDto, PaymentResponseDto } from './dto';
+import { plainToInstance } from 'class-transformer';
+import { Enrollment } from '../enrollments/entities';
+import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
+import { PaymentStatus } from '../enrollments/enums';
+import { en } from '@faker-js/faker';
+import e from 'express';
 
 @Injectable()
 export class PaymentsService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+  constructor(
+    private readonly repository: PaymentsRepository,
+    private readonly enrollmentRepository: EnrollmentsRepository,
+  ) {}
+
+  async create(dto: CreatePaymentDto): Promise<PaymentResponseDto> {
+    const enrollment = await this.enrollmentRepository.findById(
+      dto.enrollmentId,
+    );
+
+    if (!enrollment)
+      throw new NotFoundException(
+        `Enrollment with ID ${dto.enrollmentId} not found`,
+      );
+
+    const payment = await this.repository.create({
+      enrollment,
+      amount: dto.amount,
+      paidAt: new Date(dto.paidAt),
+      method: dto.method,
+    });
+
+    enrollment.feeStatus = PaymentStatus.PAID;
+
+    await this.enrollmentRepository.save(enrollment);
+
+    return plainToInstance(PaymentResponseDto, { ...payment, enrollment });
   }
 
-  findAll() {
-    return `This action returns all payments`;
+  async findAll(): Promise<PaymentResponseDto[]> {
+    const payments = await this.repository.findAll();
+    return payments.map((p) =>
+      plainToInstance(PaymentResponseDto, {
+        ...p,
+        enrollmentId: p.enrollment.id,
+      }),
+    );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
+  async findOne(id: number): Promise<PaymentResponseDto> {
+    const payment = await this.repository.findById(id);
+    if (!payment)
+      throw new NotFoundException(`Payment with id ${id} not found`);
+    return plainToInstance(PaymentResponseDto, {
+      ...payment,
+      enrollmentId: payment.enrollment.id,
+    });
   }
 
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+  async remove(id: number): Promise<void> {
+    const affected = await this.repository.delete(id);
+    if (affected === 0)
+      throw new NotFoundException(`Payment with id ${id} not found`);
   }
 }

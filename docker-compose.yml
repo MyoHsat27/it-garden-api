@@ -54,7 +54,6 @@ services:
 volumes:
   it-garden-postgres-data:
   it-garden-redis-data:
-  it-garden-minio-data:
 
 networks:
   it-garden:

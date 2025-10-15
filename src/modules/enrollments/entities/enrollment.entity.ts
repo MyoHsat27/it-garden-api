@@ -23,6 +23,17 @@ export class Enrollment {
   @Column('decimal', { name: 'fee_amount', precision: 10, scale: 2 })
   feeAmount: number;
 
+  @Column('decimal', {
+    name: 'discount_amount',
+    precision: 10,
+    scale: 2,
+    default: 0,
+  })
+  discountAmount: number;
+
+  @Column('decimal', { name: 'final_fee', precision: 10, scale: 2 })
+  finalFee: number;
+
   @Column({
     type: 'enum',
     enum: PaymentStatus,

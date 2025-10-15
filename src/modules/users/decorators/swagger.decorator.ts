@@ -8,9 +8,9 @@ import {
   ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UserDto } from '../dto/user.dto';
 import { User } from '../entities/user.entity';
 import { commonErrorResponses } from '../../../common';
+import { UserResponseDto } from '../dto';
 
 export function GetCurrentUserDecorator() {
   return applyDecorators(
@@ -22,7 +22,7 @@ export function GetCurrentUserDecorator() {
     }),
     ApiOkResponse({
       description: 'Returns the current user',
-      type: UserDto,
+      type: UserResponseDto,
     }),
     ApiUnauthorizedResponse(commonErrorResponses.unAuthorized),
   );

@@ -8,6 +8,5 @@ export const AdminFactory = setSeederFactory(Admin, () => {
   admin.fullName = faker.person.fullName();
   admin.phone = faker.phone.number();
   admin.address = faker.location.streetAddress();
-  admin.status = AdminStatus.ACTIVE;
   return admin;
 });

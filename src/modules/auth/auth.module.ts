@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
-import { CryptoService } from './crypto.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
@@ -40,7 +39,6 @@ import { NotificationsModule } from '../notifications/notifications.module';
     AuthService,
     PasswordService,
     TokenService,
-    CryptoService,
     VerificationService,
 
     // Helpers

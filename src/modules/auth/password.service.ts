@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { TokenService } from './token.service';
-import { CryptoService } from './crypto.service';
 import { ChangePasswordDto } from './dto';
 import { UsersService } from '../users/users.service';
+import { CryptoHelper } from '../../common';
 
 @Injectable()
 export class PasswordService {
@@ -17,7 +17,6 @@ export class PasswordService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
-    private readonly cryptoService: CryptoService,
   ) {}
 
   async changePassword(
@@ -31,7 +30,7 @@ export class PasswordService {
 
     const { oldPassword, newPassword } = changePasswordDto;
 
-    const isValidOldPassword = await this.cryptoService.validatePassword(
+    const isValidOldPassword = await CryptoHelper.validatePassword(
       oldPassword,
       user.password ?? '',
     );
@@ -39,7 +38,7 @@ export class PasswordService {
       throw new BadRequestException('Old password is incorrect');
     }
 
-    user.password = await this.cryptoService.hashPassword(newPassword);
+    user.password = await CryptoHelper.hashPassword(newPassword);
 
     await this.usersService.updateCurrentUser(user.id, user);
   }
@@ -73,7 +72,7 @@ export class PasswordService {
       );
     }
 
-    user.password = await this.cryptoService.hashPassword(newPassword);
+    user.password = await CryptoHelper.hashPassword(newPassword);
     user.passwordResetCode = null;
     user.passwordResetExpires = null;
 

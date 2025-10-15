@@ -1,34 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { CreatePaymentDto, PaymentResponseDto } from './dto';
+import { JwtAuthGuard } from '../auth/guards';
+import {
+  CreatePaymentDecorator,
+  DeletePaymentDecorator,
+  GetAllPaymentsDecorator,
+  GetPaymentByIdDecorator,
+} from './decorators';
 
 @Controller('payments')
+@UseGuards(JwtAuthGuard)
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentsService.create(createPaymentDto);
+  @CreatePaymentDecorator()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() dto: CreatePaymentDto): Promise<PaymentResponseDto> {
+    return this.paymentsService.create(dto);
   }
 
   @Get()
-  findAll() {
+  @GetAllPaymentsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAll(): Promise<PaymentResponseDto[]> {
     return this.paymentsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  @GetPaymentByIdDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: number): Promise<PaymentResponseDto> {
     return this.paymentsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentsService.update(+id, updatePaymentDto);
-  }
-
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @DeletePaymentDecorator()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: number): Promise<void> {
     return this.paymentsService.remove(+id);
   }
 }

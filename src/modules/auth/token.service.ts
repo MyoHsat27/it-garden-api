@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CryptoService } from './crypto.service';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities';
 import { JwtService } from '@nestjs/jwt';
+import { CryptoHelper } from '../../common';
 
 @Injectable()
 export class TokenService {
@@ -14,7 +14,6 @@ export class TokenService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly cryptoService: CryptoService,
     private readonly configService: ConfigService,
   ) {
     this.REFRESH_TOKEN_SECRET = this.configService.get<string>(
@@ -53,7 +52,7 @@ export class TokenService {
   }
 
   async validateRefreshToken(providedToken: string): Promise<User> {
-    const hashedToken = this.cryptoService.hashToken(providedToken);
+    const hashedToken = CryptoHelper.hashToken(providedToken);
     const user = await this.usersService.findByRefreshToken(hashedToken);
 
     if (!user) {

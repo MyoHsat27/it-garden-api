@@ -1,1 +1,9 @@
-export class CreateClassroomDto {}
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
+
+export class CreateClassroomDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+}

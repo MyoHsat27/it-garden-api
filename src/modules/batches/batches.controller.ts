@@ -1,34 +1,66 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Patch,
+} from '@nestjs/common';
 import { BatchesService } from './batches.service';
-import { CreateBatchDto } from './dto/create-batch.dto';
-import { UpdateBatchDto } from './dto/update-batch.dto';
+import { BatchResponseDto, CreateBatchDto, UpdateBatchDto } from './dto';
+import {
+  CreateBatchDecorator,
+  GetAllBatchesDecorator,
+  GetBatchByIdDecorator,
+  UpdateBatchDecorator,
+  DeleteBatchDecorator,
+} from './decorators/swagger.decorator';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('batches')
+@UseGuards(JwtAuthGuard)
 export class BatchesController {
-  constructor(private readonly batchesService: BatchesService) {}
+  constructor(private readonly service: BatchesService) {}
 
   @Post()
-  create(@Body() createBatchDto: CreateBatchDto) {
-    return this.batchesService.create(createBatchDto);
+  @CreateBatchDecorator()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() dto: CreateBatchDto): Promise<BatchResponseDto> {
+    return await this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.batchesService.findAll();
+  @GetAllBatchesDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAll(): Promise<BatchResponseDto[]> {
+    return await this.service.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.batchesService.findOne(+id);
+  @GetBatchByIdDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: number): Promise<BatchResponseDto> {
+    return await this.service.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBatchDto: UpdateBatchDto) {
-    return this.batchesService.update(+id, updateBatchDto);
+  @UpdateBatchDecorator()
+  @HttpCode(HttpStatus.OK)
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateBatchDto,
+  ): Promise<BatchResponseDto> {
+    return await this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.batchesService.remove(+id);
+  @DeleteBatchDecorator()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: number): Promise<void> {
+    return await this.service.remove(+id);
   }
 }

@@ -25,6 +25,15 @@ export class Batch {
   @Column({ unique: true })
   name: string;
 
+  @Column('text')
+  description: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
   @ManyToOne(() => Course, (course) => course.batches, { onDelete: 'CASCADE' })
   course: Course;
 
@@ -50,10 +59,4 @@ export class Batch {
 
   @OneToMany(() => Announcement, (announcement) => announcement.batch)
   announcements: Announcement[];
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
 }
