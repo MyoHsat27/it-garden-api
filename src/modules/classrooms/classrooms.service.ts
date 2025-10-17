@@ -6,6 +6,8 @@ import {
   UpdateClassroomDto,
   ClassroomResponseDto,
 } from './dto';
+import { GetClassroomsQueryDto } from './dto/get-classrooms-query.dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Injectable()
 export class ClassroomsService {
@@ -19,6 +21,21 @@ export class ClassroomsService {
   async findAll(): Promise<ClassroomResponseDto[]> {
     const classrooms = await this.repository.findAll();
     return plainToInstance(ClassroomResponseDto, classrooms);
+  }
+
+  async findAllBatchesWithFilters(query: GetClassroomsQueryDto) {
+    const result = await this.repository.findWithFilters(query);
+
+    const data = result.data.map((a) =>
+      plainToInstance(ClassroomResponseDto, a),
+    );
+
+    return new PaginatedResponseDto(
+      data,
+      result.totalItems,
+      result.page,
+      result.limit,
+    );
   }
 
   async findOne(id: number): Promise<ClassroomResponseDto> {

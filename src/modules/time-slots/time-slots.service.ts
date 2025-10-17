@@ -5,7 +5,9 @@ import {
   CreateTimeSlotDto,
   UpdateTimeSlotDto,
   TimeSlotResponseDto,
+  GetTimeSlotsQueryDto,
 } from './dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Injectable()
 export class TimeSlotsService {
@@ -19,6 +21,21 @@ export class TimeSlotsService {
   async findAll(): Promise<TimeSlotResponseDto[]> {
     const timeSlots = await this.repository.findAll();
     return plainToInstance(TimeSlotResponseDto, timeSlots);
+  }
+
+  async findAllTimeSlotsWithFilters(query: GetTimeSlotsQueryDto) {
+    const result = await this.repository.findWithFilters(query);
+
+    const data = result.data.map((a) =>
+      plainToInstance(TimeSlotResponseDto, a),
+    );
+
+    return new PaginatedResponseDto(
+      data,
+      result.totalItems,
+      result.page,
+      result.limit,
+    );
   }
 
   async findOne(id: number): Promise<TimeSlotResponseDto> {

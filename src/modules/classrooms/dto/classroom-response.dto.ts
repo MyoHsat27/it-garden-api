@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { TimetableResponseDto } from '../../timetables/dto';
 
 export class ClassroomResponseDto {
   @ApiProperty()

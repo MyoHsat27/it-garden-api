@@ -80,8 +80,16 @@ export class AuthService {
     };
   }
 
-  async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(login: string, password: string): Promise<User> {
+    let user = await this.usersService.findByEmail(login);
+
+    if (!user) {
+      user = await this.usersService.findByUsername(login);
+    }
+
+    if (!user) {
+      throw new NotFoundException('No user found with this email or username.');
+    }
 
     if (!user) {
       throw new NotFoundException('No user found with this email address.');

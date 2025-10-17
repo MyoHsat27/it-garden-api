@@ -18,6 +18,11 @@ export class CreateCourseDto {
   @IsString()
   description: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  duration: string;
+
   @ApiProperty({ default: true })
   @IsOptional()
   @IsBoolean()

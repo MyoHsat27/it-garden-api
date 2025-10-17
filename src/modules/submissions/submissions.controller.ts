@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { SubmissionsService } from './submissions.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
@@ -45,7 +46,7 @@ export class SubmissionsController {
     return this.submissionsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateSubmissionDecorator()
   @HttpCode(HttpStatus.OK)
   update(

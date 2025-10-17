@@ -11,8 +11,6 @@ import {
   Column,
   OneToMany,
   ManyToOne,
-  ManyToMany,
-  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -37,13 +35,11 @@ export class Batch {
   @ManyToOne(() => Course, (course) => course.batches, { onDelete: 'CASCADE' })
   course: Course;
 
-  @ManyToMany(() => Teacher, (teacher) => teacher.batches)
-  @JoinTable({
-    name: 'batch_teachers',
-    joinColumn: { name: 'batch_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'teacher_id', referencedColumnName: 'id' },
+  @ManyToOne(() => Teacher, (teacher) => teacher.batches, {
+    onDelete: 'SET NULL',
+    nullable: true,
   })
-  teachers: Teacher[];
+  teacher: Teacher;
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.batch)
   enrollments: Enrollment[];

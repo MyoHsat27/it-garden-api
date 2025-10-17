@@ -41,7 +41,6 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UseGuards(LocalAuthGuard)
   @LoginUsersDecorator()
   @HttpCode(HttpStatus.OK)

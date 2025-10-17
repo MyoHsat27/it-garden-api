@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  MinLength,
+} from 'class-validator';
 import { Gender } from '../../../common';
 
 export class CreateAdminDto {
@@ -28,4 +34,8 @@ export class CreateAdminDto {
   @ApiProperty({ example: Gender.MALE, enum: Gender })
   @IsEnum(Gender)
   gender: Gender;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  roleId: number;
 }

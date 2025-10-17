@@ -7,9 +7,18 @@ import {
   Body,
   UseGuards,
   Patch,
+  Put,
+  HttpCode,
+  HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { TimeSlotsService } from './time-slots.service';
-import { CreateTimeSlotDto, UpdateTimeSlotDto } from './dto';
+import {
+  CreateTimeSlotDto,
+  GetTimeSlotsQueryDto,
+  TimeSlotResponseDto,
+  UpdateTimeSlotDto,
+} from './dto';
 import {
   CreateTimeSlotDecorator,
   GetAllTimeSlotsDecorator,
@@ -18,6 +27,7 @@ import {
   DeleteTimeSlotDecorator,
 } from './decorators/swagger.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('time-slots')
 @UseGuards(JwtAuthGuard)
@@ -36,13 +46,22 @@ export class TimeSlotsController {
     return this.service.findAll();
   }
 
+  @Get('filtered')
+  @GetAllTimeSlotsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllCoursesWithFilters(
+    @Query() query: GetTimeSlotsQueryDto,
+  ): Promise<PaginatedResponseDto<TimeSlotResponseDto>> {
+    return this.service.findAllTimeSlotsWithFilters(query);
+  }
+
   @Get(':id')
   @GetTimeSlotByIdDecorator()
   async findOne(@Param('id') id: number) {
     return this.service.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateTimeSlotDecorator()
   async update(@Param('id') id: number, @Body() dto: UpdateTimeSlotDto) {
     return this.service.update(id, dto);

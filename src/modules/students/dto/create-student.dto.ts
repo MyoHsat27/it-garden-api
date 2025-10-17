@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsNotEmpty, MinLength } from 'class-validator';
 import { Gender } from '../../../common';
+import { StudentStatus } from '../enums';
 
 export class CreateStudentDto {
   @ApiProperty({
@@ -8,12 +9,6 @@ export class CreateStudentDto {
   })
   @IsNotEmpty()
   fullName: string;
-
-  @ApiProperty({
-    example: 'ITG-222345',
-  })
-  @IsNotEmpty()
-  registrationNumber: string;
 
   @ApiProperty({
     example: 'Mg Mg',
@@ -46,4 +41,8 @@ export class CreateStudentDto {
   @ApiProperty({ example: Gender.MALE, enum: Gender })
   @IsEnum(Gender)
   gender: Gender;
+
+  @ApiProperty({ example: StudentStatus.ACTIVE, enum: StudentStatus })
+  @IsEnum(StudentStatus)
+  status: StudentStatus;
 }

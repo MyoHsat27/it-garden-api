@@ -9,9 +9,16 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { CreateStudentDto, UpdateStudentDto, StudentResponseDto } from './dto';
+import {
+  CreateStudentDto,
+  UpdateStudentDto,
+  StudentResponseDto,
+  GetStudentsQueryDto,
+} from './dto';
 import {
   CreateStudentDecorator,
   GetAllStudentsDecorator,
@@ -20,6 +27,8 @@ import {
   DeleteStudentDecorator,
 } from './decorators';
 import { JwtAuthGuard } from '../auth/guards';
+import { plainToInstance } from 'class-transformer';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('students')
 @UseGuards(JwtAuthGuard)
@@ -37,7 +46,17 @@ export class StudentsController {
   @GetAllStudentsDecorator()
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<StudentResponseDto[]> {
-    return await this.studentsService.findAll();
+    const students = await this.studentsService.findAll();
+    return plainToInstance(StudentResponseDto, students);
+  }
+
+  @Get('filtered')
+  @GetAllStudentsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllStudentsWithFilters(
+    @Query() query: GetStudentsQueryDto,
+  ): Promise<PaginatedResponseDto<StudentResponseDto>> {
+    return this.studentsService.findAllStudentsWithFilters(query);
   }
 
   @Get(':id')
@@ -47,7 +66,7 @@ export class StudentsController {
     return await this.studentsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateStudentDecorator()
   @HttpCode(HttpStatus.OK)
   async update(

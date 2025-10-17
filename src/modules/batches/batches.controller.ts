@@ -9,6 +9,9 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  Put,
+  Query,
+  Logger,
 } from '@nestjs/common';
 import { BatchesService } from './batches.service';
 import { BatchResponseDto, CreateBatchDto, UpdateBatchDto } from './dto';
@@ -20,6 +23,9 @@ import {
   DeleteBatchDecorator,
 } from './decorators/swagger.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { plainToInstance } from 'class-transformer';
+import { GetBatchesQueryDto } from './dto/get-batches-query.dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('batches')
 @UseGuards(JwtAuthGuard)
@@ -30,31 +36,44 @@ export class BatchesController {
   @CreateBatchDecorator()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateBatchDto): Promise<BatchResponseDto> {
-    return await this.service.create(dto);
+    const batch = await this.service.create(dto);
+    return plainToInstance(BatchResponseDto, batch);
   }
 
   @Get()
   @GetAllBatchesDecorator()
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<BatchResponseDto[]> {
-    return await this.service.findAll();
+    const batches = await this.service.findAll();
+    return plainToInstance(BatchResponseDto, batches);
+  }
+
+  @Get('filtered')
+  @GetAllBatchesDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllBatchesWithFilters(
+    @Query() query: GetBatchesQueryDto,
+  ): Promise<PaginatedResponseDto<BatchResponseDto>> {
+    return this.service.findAllBatchesWithFilters(query);
   }
 
   @Get(':id')
   @GetBatchByIdDecorator()
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: number): Promise<BatchResponseDto> {
-    return await this.service.findOne(id);
+    const batch = await this.service.findOne(id);
+    return plainToInstance(BatchResponseDto, batch);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateBatchDecorator()
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: number,
     @Body() dto: UpdateBatchDto,
   ): Promise<BatchResponseDto> {
-    return await this.service.update(id, dto);
+    const batch = await this.service.update(id, dto);
+    return plainToInstance(BatchResponseDto, batch);
   }
 
   @Delete(':id')

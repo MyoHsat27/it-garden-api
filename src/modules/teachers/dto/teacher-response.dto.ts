@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { Gender } from '../../../common';
+import { UserResponseDto } from '../../users/dto';
+import { BatchResponseDto } from '../../batches/dto';
 
 export class TeacherResponseDto {
   @ApiProperty()
@@ -25,18 +27,19 @@ export class TeacherResponseDto {
 
   @ApiProperty()
   @Expose()
-  status: string;
-
-  @ApiProperty()
-  @Expose()
   createdAt: Date;
 
   @ApiProperty()
   @Expose()
   updatedAt: Date;
 
-  @ApiProperty({ description: 'User ID linked to this admin' })
+  @ApiProperty({ type: () => UserResponseDto })
   @Expose()
-  @Type(() => Number)
-  userId: number;
+  @Type(() => UserResponseDto)
+  user: UserResponseDto;
+
+  @ApiProperty({ type: () => [BatchResponseDto] })
+  @Expose()
+  @Type(() => BatchResponseDto)
+  batches: BatchResponseDto[];
 }

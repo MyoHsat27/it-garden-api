@@ -9,9 +9,16 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
-import { CreateCourseDto, UpdateCourseDto, CourseResponseDto } from './dto';
+import {
+  CreateCourseDto,
+  UpdateCourseDto,
+  CourseResponseDto,
+  GetCoursesQueryDto,
+} from './dto';
 import {
   CreateCourseDecorator,
   GetAllCoursesDecorator,
@@ -20,6 +27,7 @@ import {
   DeleteCourseDecorator,
 } from './decorators/swagger.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('courses')
 @UseGuards(JwtAuthGuard)
@@ -40,6 +48,15 @@ export class CoursesController {
     return this.coursesService.findAll();
   }
 
+  @Get('filtered')
+  @GetAllCoursesDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllCoursesWithFilters(
+    @Query() query: GetCoursesQueryDto,
+  ): Promise<PaginatedResponseDto<CourseResponseDto>> {
+    return this.coursesService.findAllCoursesWithFilters(query);
+  }
+
   @Get(':id')
   @GetCourseByIdDecorator()
   @HttpCode(HttpStatus.OK)
@@ -47,7 +64,7 @@ export class CoursesController {
     return this.coursesService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateCourseDecorator()
   @HttpCode(HttpStatus.OK)
   update(

@@ -4,11 +4,12 @@ import {
   ExecutionContext,
   CallHandler,
   HttpStatus,
-} from "@nestjs/common";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
-import { Response, Request } from "express";
-import { IPaginationMeta, IStandardResponse } from "../interfaces";
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Response, Request } from 'express';
+import { IPaginationMeta, IStandardResponse } from '../interfaces';
+import { PaginatedResponseDto } from '../dtos';
 
 @Injectable()
 export class StandardResponseInterceptor implements NestInterceptor {
@@ -16,7 +17,6 @@ export class StandardResponseInterceptor implements NestInterceptor {
     const http = ctx.switchToHttp();
     const response = http.getResponse<Response>();
     const request = http.getRequest<Request>();
-    const requestId = (request as any).requestId || "N/A";
 
     return next.handle().pipe(
       map((data: unknown) => {
@@ -24,9 +24,9 @@ export class StandardResponseInterceptor implements NestInterceptor {
         const isSuccessful = statusCode >= 200 && statusCode < 300;
 
         const standardResponse: IStandardResponse<typeof data> = {
-          status: isSuccessful ? "success" : "error",
+          status: isSuccessful ? 'success' : 'error',
           statusCode,
-          data: isSuccessful ? (data ?? null) : null,
+          data: null,
           meta: {
             timestamp: new Date().toISOString(),
             path: request.originalUrl,
@@ -34,16 +34,14 @@ export class StandardResponseInterceptor implements NestInterceptor {
           },
         };
 
-        if (isSuccessful && this.isPaginated(data)) {
-          standardResponse.data = data.items;
-          if (!standardResponse.meta) {
-            standardResponse.meta = {
-              timestamp: new Date().toISOString(),
-              path: request.originalUrl,
-              method: request.method,
-            };
-          }
-          standardResponse.meta.pagination = this.extractPaginationMeta(data);
+        if (isSuccessful && this.isPaginatedResponse(data)) {
+          const pagination = this.extractPaginationMeta(data);
+          standardResponse.data = data.data;
+          standardResponse.meta.pagination = pagination;
+        } else if (isSuccessful) {
+          standardResponse.data = data ?? null;
+        } else {
+          standardResponse.error = this.normalizeError(data);
         }
 
         if (!isSuccessful && data) {
@@ -55,27 +53,29 @@ export class StandardResponseInterceptor implements NestInterceptor {
     );
   }
 
-  private isPaginated(data: unknown): data is { items: any[]; meta: any } {
+  private isPaginatedResponse(
+    data: unknown,
+  ): data is PaginatedResponseDto<any> {
     return (
-      typeof data === "object" &&
+      typeof data === 'object' &&
       data !== null &&
-      "items" in data &&
-      Array.isArray((data as any).items) &&
-      "meta" in data
+      'data' in data &&
+      'totalItems' in data &&
+      'page' in data &&
+      'limit' in data
     );
   }
 
-  private extractPaginationMeta(data: {
-    meta: IPaginationMeta;
-  }): IPaginationMeta {
-    const meta = data.meta;
+  private extractPaginationMeta(
+    data: PaginatedResponseDto<any>,
+  ): IPaginationMeta {
     return {
-      page: meta.page,
-      limit: meta.limit,
-      totalItems: meta.totalItems,
-      totalPages: Math.ceil(meta.totalItems / meta.limit),
-      hasPreviousPage: meta.page > 1,
-      hasNextPage: meta.page < Math.ceil(meta.totalItems / meta.limit),
+      page: data.page,
+      limit: data.limit,
+      totalItems: data.totalItems,
+      totalPages: data.totalPages,
+      hasPreviousPage: data.hasPreviousPage,
+      hasNextPage: data.hasNextPage,
     };
   }
 
@@ -84,34 +84,18 @@ export class StandardResponseInterceptor implements NestInterceptor {
     code?: string;
     details?: unknown;
   } {
-    if (typeof error === "string") {
-      return { message: error };
-    }
+    if (typeof error === 'string') return { message: error };
 
-    if (error instanceof Error) {
+    if (error instanceof Error) return { message: error.message };
+
+    if (typeof error === 'object' && error !== null) {
+      const e = error as Record<string, unknown>;
       return {
-        message: error.message,
-        code:
-          typeof (error as { code?: string }).code === "string"
-            ? (error as { code?: string }).code
-            : undefined,
-        details:
-          "details" in error
-            ? (error as { details?: unknown }).details
-            : undefined,
+        message: (e.message as string) || 'Unknown error',
+        code: e.code as string,
       };
     }
 
-    if (typeof error === "object" && error !== null) {
-      const errObj = error as Record<string, unknown>;
-      return {
-        message:
-          typeof errObj.message === "string" ? errObj.message : "Unknown error",
-        code: typeof errObj.code === "string" ? errObj.code : undefined,
-        details: errObj.details,
-      };
-    }
-
-    return { message: "Unknown error occurred" };
+    return { message: 'Unknown error' };
   }
 }

@@ -2,16 +2,22 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Delete,
   Param,
   Body,
   HttpCode,
   HttpStatus,
   UseGuards,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { TeachersService } from './teachers.service';
-import { CreateTeacherDto, UpdateTeacherDto, TeacherResponseDto } from './dto';
+import {
+  CreateTeacherDto,
+  UpdateTeacherDto,
+  TeacherResponseDto,
+  GetTeachersQueryDto,
+} from './dto';
 import {
   CreateTeacherDecorator,
   GetAllTeachersDecorator,
@@ -20,6 +26,8 @@ import {
   DeleteTeacherDecorator,
 } from './decorators';
 import { JwtAuthGuard } from '../auth/guards';
+import { plainToInstance } from 'class-transformer';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('teachers')
 @UseGuards(JwtAuthGuard)
@@ -37,7 +45,17 @@ export class TeachersController {
   @GetAllTeachersDecorator()
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<TeacherResponseDto[]> {
-    return await this.teachersService.findAll();
+    const teachers = await this.teachersService.findAll();
+    return plainToInstance(TeacherResponseDto, teachers);
+  }
+
+  @Get('filtered')
+  @GetAllTeachersDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllTeachersWithFilters(
+    @Query() query: GetTeachersQueryDto,
+  ): Promise<PaginatedResponseDto<TeacherResponseDto>> {
+    return this.teachersService.findAllTeachersWithFilters(query);
   }
 
   @Get(':id')
@@ -47,7 +65,7 @@ export class TeachersController {
     return await this.teachersService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateTeacherDecorator()
   @HttpCode(HttpStatus.OK)
   async update(

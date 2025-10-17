@@ -9,6 +9,8 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { ClassroomsService } from './classrooms.service';
 import {
@@ -24,6 +26,8 @@ import {
   DeleteClassroomDecorator,
 } from './decorators/swagger.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { GetClassroomsQueryDto } from './dto/get-classrooms-query.dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('classrooms')
 @UseGuards(JwtAuthGuard)
@@ -44,6 +48,15 @@ export class ClassroomsController {
     return await this.classroomsService.findAll();
   }
 
+  @Get('filtered')
+  @GetAllClassroomsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllClassroomsWithFilters(
+    @Query() query: GetClassroomsQueryDto,
+  ): Promise<PaginatedResponseDto<ClassroomResponseDto>> {
+    return this.classroomsService.findAllBatchesWithFilters(query);
+  }
+
   @Get(':id')
   @GetClassroomByIdDecorator()
   @HttpCode(HttpStatus.OK)
@@ -51,7 +64,7 @@ export class ClassroomsController {
     return await this.classroomsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateClassroomDecorator()
   @HttpCode(HttpStatus.OK)
   async update(

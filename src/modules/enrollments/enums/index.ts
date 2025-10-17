@@ -1,1 +1,1 @@
-export * from './payment-status.enum';
+export * from './enrollment-status.enum';

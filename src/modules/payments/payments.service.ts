@@ -2,12 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentsRepository } from './payments.repository';
 import { CreatePaymentDto, PaymentResponseDto } from './dto';
 import { plainToInstance } from 'class-transformer';
-import { Enrollment } from '../enrollments/entities';
 import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
-import { PaymentStatus } from '../enrollments/enums';
-import { en } from '@faker-js/faker';
-import e from 'express';
-
+import { PaymentStatus } from '../../common';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -29,7 +25,7 @@ export class PaymentsService {
       enrollment,
       amount: dto.amount,
       paidAt: new Date(dto.paidAt),
-      method: dto.method,
+      paymentMethod: dto.paymentMethod,
     });
 
     enrollment.feeStatus = PaymentStatus.PAID;

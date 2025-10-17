@@ -7,6 +7,10 @@ import {
   Body,
   Param,
   Patch,
+  HttpCode,
+  HttpStatus,
+  Query,
+  Logger,
 } from '@nestjs/common';
 import { EnrollmentsService } from './enrollments.service';
 import { CreateEnrollmentDto, UpdateEnrollmentDto } from './dto';
@@ -18,6 +22,8 @@ import {
   UpdateEnrollmentDecorator,
   DeleteEnrollmentDecorator,
 } from './decorators/swagger.decorator';
+import { GetEnrollmentsQueryDto } from './dto/get-enrollments-query.dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('enrollments')
 export class EnrollmentsController {
@@ -35,13 +41,22 @@ export class EnrollmentsController {
     return this.service.findAll();
   }
 
+  @Get('filtered')
+  @GetAllEnrollmentsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllCoursesWithFilters(
+    @Query() query: GetEnrollmentsQueryDto,
+  ): Promise<PaginatedResponseDto<EnrollmentResponseDto>> {
+    return this.service.findAllEnrollmentsWithFilters(query);
+  }
+
   @Get(':id')
   @GetEnrollmentByIdDecorator()
   findOne(@Param('id') id: number): Promise<EnrollmentResponseDto> {
     return this.service.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateEnrollmentDecorator()
   update(
     @Param('id') id: number,

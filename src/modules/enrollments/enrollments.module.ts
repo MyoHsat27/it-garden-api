@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EnrollmentsService } from './enrollments.service';
 import { EnrollmentsController } from './enrollments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,12 +6,14 @@ import { Enrollment } from './entities';
 import { EnrollmentsRepository } from './enrollments.repository';
 import { BatchesModule } from '../batches/batches.module';
 import { StudentsModule } from '../students/students.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Enrollment]),
     BatchesModule,
     StudentsModule,
+    forwardRef(() => PaymentsModule),
   ],
   controllers: [EnrollmentsController],
   providers: [EnrollmentsService, EnrollmentsRepository],

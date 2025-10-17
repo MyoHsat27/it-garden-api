@@ -1,4 +1,4 @@
-import { HttpStatus } from "@nestjs/common";
+import { HttpStatus } from '@nestjs/common';
 
 export interface IPaginationMeta {
   page: number;
@@ -10,10 +10,10 @@ export interface IPaginationMeta {
 }
 
 export interface IStandardResponse<T> {
-  status: "success" | "error";
+  status: 'success' | 'error';
   statusCode: HttpStatus;
   data: T | null;
-  meta?: {
+  meta: {
     timestamp: string;
     path?: string;
     method?: string;

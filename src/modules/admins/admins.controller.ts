@@ -9,9 +9,18 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
+  NotFoundException,
+  Put,
+  Logger,
 } from '@nestjs/common';
 import { AdminsService } from './admins.service';
-import { CreateAdminDto, UpdateAdminDto, AdminResponseDto } from './dto';
+import {
+  CreateAdminDto,
+  UpdateAdminDto,
+  AdminResponseDto,
+  GetAdminsQueryDto,
+} from './dto';
 import {
   CreateAdminDecorator,
   GetAllAdminsDecorator,
@@ -20,6 +29,8 @@ import {
   DeleteAdminDecorator,
 } from './decorators';
 import { JwtAuthGuard } from '../auth/guards';
+import { PaginatedResponseDto } from '../../common';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('admins')
 @UseGuards(JwtAuthGuard)
@@ -30,37 +41,52 @@ export class AdminsController {
   @CreateAdminDecorator()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateAdminDto): Promise<AdminResponseDto> {
-    return await this.adminsService.create(dto);
+    const admin = await this.adminsService.create(dto);
+    return plainToInstance(AdminResponseDto, admin);
   }
 
   @Get()
   @GetAllAdminsDecorator()
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<AdminResponseDto[]> {
-    return await this.adminsService.findAll();
+    const admins = await this.adminsService.findAll();
+    return plainToInstance(AdminResponseDto, admins);
+  }
+
+  @Get('filtered')
+  @GetAllAdminsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllAdminsWithFilters(
+    @Query() query: GetAdminsQueryDto,
+  ): Promise<PaginatedResponseDto<AdminResponseDto>> {
+    return this.adminsService.findAllAdminsWithFilters(query);
   }
 
   @Get(':id')
   @GetAdminByIdDecorator()
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: number): Promise<AdminResponseDto> {
-    return await this.adminsService.findOne(id);
+    const admin = await this.adminsService.findOne(+id);
+    if (!admin) throw new NotFoundException(`Admin with ID ${id} not found`);
+    return plainToInstance(AdminResponseDto, admin);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UpdateAdminDecorator()
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: number,
     @Body() dto: UpdateAdminDto,
   ): Promise<AdminResponseDto> {
-    return await this.adminsService.update(id, dto);
+    const admin = await this.adminsService.update(+id, dto);
+    if (!admin) throw new NotFoundException(`Admin with ID ${id} not found`);
+    return plainToInstance(AdminResponseDto, admin);
   }
 
   @Delete(':id')
   @DeleteAdminDecorator()
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: number): Promise<void> {
-    return await this.adminsService.remove(id);
+    return this.adminsService.remove(+id);
   }
 }

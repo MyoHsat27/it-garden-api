@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsArray,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateBatchDto {
   @ApiProperty()
@@ -17,11 +23,9 @@ export class CreateBatchDto {
   courseId: number;
 
   @ApiProperty({
-    description: 'Teacher IDs assigned to this batch',
-    required: false,
-    example: [1],
+    description: 'Teacher ID assigned to this batch',
+    example: 1,
   })
-  @IsArray()
-  @IsNumber({}, { each: true })
-  teacherIds: number[];
+  @IsNumber()
+  teacherId: number;
 }

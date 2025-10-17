@@ -7,6 +7,8 @@ import {
   ManyToMany,
   JoinTable,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('roles')
@@ -23,4 +25,10 @@ export class Role {
 
   @OneToMany(() => Admin, (admin) => admin.role)
   admins: Admin[];
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

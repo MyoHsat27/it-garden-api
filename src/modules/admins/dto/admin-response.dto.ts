@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { Gender } from '../../../common';
+import { RoleResponseDto } from '../../roles/dto';
+import { UserResponseDto } from '../../users/dto';
 
 export class AdminResponseDto {
   @ApiProperty()
@@ -35,8 +37,11 @@ export class AdminResponseDto {
   @Expose()
   updatedAt: Date;
 
-  @ApiProperty({ description: 'User ID linked to this admin' })
   @Expose()
-  @Type(() => Number)
-  userId: number;
+  @Type(() => UserResponseDto)
+  user: UserResponseDto;
+
+  @Expose()
+  @Type(() => RoleResponseDto)
+  role: RoleResponseDto;
 }

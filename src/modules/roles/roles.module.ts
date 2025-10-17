@@ -1,21 +1,20 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { RolesController } from './roles.controller';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from './entities';
-import { Repository } from 'typeorm';
+import { RolesRepository } from './roles.repository';
+import { PermissionsModule } from '../permissions/permissions.module';
+import { AdminsModule } from '../admins/admins.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Role])],
-  controllers: [RolesController],
-  providers: [
-    {
-      provide: 'ROLE_REPOSITORY',
-      useFactory: (repo: Repository<Role>) => repo,
-      inject: [getRepositoryToken(Role)],
-    },
-    RolesService,
+  imports: [
+    TypeOrmModule.forFeature([Role]),
+    forwardRef(() => PermissionsModule),
+    forwardRef(() => AdminsModule),
   ],
-  exports: ['ROLE_REPOSITORY', RolesService],
+  controllers: [RolesController],
+  providers: [RolesService, RolesRepository],
+  exports: [RolesRepository, RolesService],
 })
 export class RolesModule {}

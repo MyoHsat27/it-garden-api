@@ -35,7 +35,10 @@ export class UsersService {
   }
 
   async findById(id: number): Promise<User | null> {
-    const user = await this.userRepo.findOneBy({ id });
+    const user = await this.userRepo.findOne({
+      where: { id },
+      relations: ['studentProfile', 'teacherProfile', 'adminProfile'],
+    });
     return user;
   }
 
@@ -50,11 +53,6 @@ export class UsersService {
       ...dto,
       password: hashed,
     });
-    return await this.userRepo.save(user);
-  }
-
-  async createFromGoogle(profile: GoogleProfile): Promise<User> {
-    const user = this.userRepo.create(profile);
     return await this.userRepo.save(user);
   }
 

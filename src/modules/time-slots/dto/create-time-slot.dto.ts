@@ -1,7 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, Min, Max, IsString, Matches } from 'class-validator';
+import { IsInt, Min, Max, IsString } from 'class-validator';
 
 export class CreateTimeSlotDto {
+  @ApiProperty({ example: '13:00:00' })
+  @IsString()
+  name: string;
+
   @ApiProperty()
   @IsInt()
   @Min(0)
@@ -10,15 +14,9 @@ export class CreateTimeSlotDto {
 
   @ApiProperty({ example: '13:00:00' })
   @IsString()
-  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {
-    message: 'startTime must be in HH:mm:ss format',
-  })
   startTime: string;
 
   @ApiProperty({ example: '15:00:00' })
   @IsString()
-  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {
-    message: 'endTime must be in HH:mm:ss format',
-  })
   endTime: string;
 }

@@ -1,5 +1,12 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Student } from '../../students/entities';
+import { Teacher } from '../../teachers/entities';
+import { UserRole } from '../enums';
+import { Admin } from '../../admins/entities';
+import { AdminResponseDto } from '../../admins/dto';
+import { TeacherResponseDto } from '../../teachers/dto';
+import { StudentResponseDto } from '../../students/dto';
 
 export class UserResponseDto {
   @ApiProperty({
@@ -24,23 +31,28 @@ export class UserResponseDto {
   email: string;
 
   @ApiProperty({
-    description: 'The ban status of the user',
-    example: true,
-  })
-  @Expose()
-  isBanned: boolean;
-
-  @ApiProperty({
-    description: 'The onboarding status of the user',
-    example: true,
-  })
-  @Expose()
-  hasCompletedOnboarding: boolean;
-
-  @ApiProperty({
     description: 'The email verify status of the user',
     example: true,
   })
   @Expose()
   isEmailVerified: boolean;
+
+  @ApiProperty({
+    description: 'The role of the user',
+    example: UserRole.ADMIN,
+  })
+  @Expose()
+  userRole: UserRole;
+
+  @Expose()
+  @Type(() => StudentResponseDto)
+  studentProfile?: StudentResponseDto;
+
+  @Expose()
+  @Type(() => TeacherResponseDto)
+  teacherProfile?: TeacherResponseDto;
+
+  @Expose()
+  @Type(() => AdminResponseDto)
+  adminProfile?: AdminResponseDto;
 }

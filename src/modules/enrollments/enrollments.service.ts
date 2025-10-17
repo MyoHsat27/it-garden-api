@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { EnrollmentsRepository } from './enrollments.repository';
@@ -12,7 +13,9 @@ import {
 } from './dto';
 import { StudentsRepository } from '../students/students.repository';
 import { BatchesRepository } from '../batches/batches.repository';
-import { PaymentStatus } from './enums';
+import { PaymentsRepository } from '../payments/payments.repository';
+import { PaginatedResponseDto, PaymentStatus } from '../../common';
+import { GetEnrollmentsQueryDto } from './dto/get-enrollments-query.dto';
 
 @Injectable()
 export class EnrollmentsService {
@@ -20,6 +23,7 @@ export class EnrollmentsService {
     private readonly repository: EnrollmentsRepository,
     private readonly studentsRepo: StudentsRepository,
     private readonly batchesRepo: BatchesRepository,
+    private readonly paymentsRepo: PaymentsRepository,
   ) {}
 
   async create(dto: CreateEnrollmentDto): Promise<EnrollmentResponseDto> {
@@ -37,15 +41,34 @@ export class EnrollmentsService {
     if (existing)
       throw new BadRequestException('Student already enrolled in this batch');
 
+    if (dto.discountAmount > batch.course.price) {
+      throw new BadRequestException('Discount cannot exceed the fee amount');
+    }
+
+    const finalFee = batch.course.price - dto.discountAmount;
+
     const enrollment = await this.repository.save({
       student,
       batch,
       feeAmount: batch.course.price,
       discountAmount: dto.discountAmount,
-      finalFee: batch.course.price - dto.discountAmount,
-      feeStatus: PaymentStatus.PENDING,
+      finalFee,
+      feeStatus: dto.feeStatus,
       dueDate: new Date(dto.dueDate),
     } as any);
+
+    if (dto.feeStatus === PaymentStatus.PAID) {
+      await this.paymentsRepo.create({
+        amount: enrollment.finalFee,
+        paidAt: new Date(),
+        paymentMethod: dto.paymentMethod,
+        enrollment: enrollment,
+      });
+
+      enrollment.feeStatus = PaymentStatus.PAID;
+
+      await this.repository.save(enrollment);
+    }
 
     return plainToInstance(EnrollmentResponseDto, {
       ...enrollment,
@@ -62,6 +85,21 @@ export class EnrollmentsService {
         studentId: e.student.id,
         batchId: e.batch.id,
       }),
+    );
+  }
+
+  async findAllEnrollmentsWithFilters(query: GetEnrollmentsQueryDto) {
+    const result = await this.repository.findWithFilters(query);
+
+    const data = result.data.map((a) =>
+      plainToInstance(EnrollmentResponseDto, a),
+    );
+
+    return new PaginatedResponseDto(
+      data,
+      result.totalItems,
+      result.page,
+      result.limit,
     );
   }
 
@@ -82,15 +120,11 @@ export class EnrollmentsService {
     const enrollment = await this.repository.findById(id);
     if (!enrollment) throw new NotFoundException(`Enrollment ${id} not found`);
 
-    if (dto.feeStatus) enrollment.feeStatus = dto.feeStatus;
-    if (dto.dueDate) enrollment.dueDate = new Date(dto.dueDate);
+    if (dto.enrollmentStatus)
+      enrollment.enrollmentStatus = dto.enrollmentStatus;
 
     const updated = await this.repository.update(enrollment);
-    return plainToInstance(EnrollmentResponseDto, {
-      ...updated,
-      studentId: updated.student.id,
-      batchId: updated.batch.id,
-    });
+    return plainToInstance(EnrollmentResponseDto, updated);
   }
 
   async remove(id: number): Promise<void> {

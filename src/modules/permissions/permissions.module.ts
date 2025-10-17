@@ -1,21 +1,18 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { PermissionsController } from './permissions.controller';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Permission } from './entities';
-import { Repository } from 'typeorm';
+import { PermissionsRepository } from './permissions.repository';
+import { RolesModule } from '../roles';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Permission])],
-  controllers: [PermissionsController],
-  providers: [
-    {
-      provide: 'PERMISSION_REPOSITORY',
-      useFactory: (repo: Repository<Permission>) => repo,
-      inject: [getRepositoryToken(Permission)],
-    },
-    PermissionsService,
+  imports: [
+    TypeOrmModule.forFeature([Permission]),
+    forwardRef(() => RolesModule),
   ],
-  exports: ['PERMISSION_REPOSITORY', PermissionsService],
+  controllers: [PermissionsController],
+  providers: [PermissionsService, PermissionsRepository],
+  exports: [PermissionsRepository, PermissionsService],
 })
 export class PermissionsModule {}

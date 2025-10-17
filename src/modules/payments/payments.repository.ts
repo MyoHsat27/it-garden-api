@@ -17,7 +17,7 @@ export class PaymentsRepository {
 
   async findAll(): Promise<Payment[]> {
     return this.repo.find({
-      order: { createdAt: 'DESC' },
+      order: { id: 'DESC' },
       relations: ['enrollment'],
     });
   }

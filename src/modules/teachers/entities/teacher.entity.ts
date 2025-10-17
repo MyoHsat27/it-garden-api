@@ -49,7 +49,7 @@ export class Teacher {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToMany(() => Batch, (batch) => batch.teachers)
+  @OneToMany(() => Batch, (batch) => batch.teacher)
   batches: Batch[];
 
   @ManyToMany(() => Assignment, (assignment) => assignment.teacher)

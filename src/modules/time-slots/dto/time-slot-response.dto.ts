@@ -17,4 +17,12 @@ export class TimeSlotResponseDto {
   @ApiProperty()
   @Expose()
   endTime: string;
+
+  @ApiProperty()
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty()
+  @Expose()
+  updatedAt: Date;
 }

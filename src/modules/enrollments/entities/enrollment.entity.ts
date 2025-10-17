@@ -12,8 +12,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
-import { PaymentStatus } from '../enums';
+import { EnrollmentStatus } from '../enums';
+import { PaymentStatus } from '../../../common';
 
 @Entity('enrollments')
 export class Enrollment {
@@ -45,6 +48,14 @@ export class Enrollment {
   @Column({ type: 'date', name: 'due_date' })
   dueDate: Date;
 
+  @Column({
+    type: 'enum',
+    enum: EnrollmentStatus,
+    default: EnrollmentStatus.ACTIVE,
+    name: 'enrollment_status',
+  })
+  enrollmentStatus: EnrollmentStatus;
+
   @ManyToOne(() => Student, (student) => student.enrollments, {
     onDelete: 'CASCADE',
   })
@@ -62,8 +73,11 @@ export class Enrollment {
   @OneToMany(() => ExamResult, (result) => result.enrollment)
   examResults: ExamResult[];
 
-  @OneToMany(() => Payment, (payment) => payment.enrollment)
-  payments: Payment[];
+  @OneToOne(() => Payment, (payment) => payment.enrollment, {
+    cascade: false,
+    onDelete: 'SET NULL',
+  })
+  payment?: Payment | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

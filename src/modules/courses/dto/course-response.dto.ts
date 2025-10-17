@@ -16,6 +16,10 @@ export class CourseResponseDto {
 
   @ApiProperty()
   @Expose()
+  duration: string;
+
+  @ApiProperty()
+  @Expose()
   isActive: boolean;
 
   @ApiProperty()

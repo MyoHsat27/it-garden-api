@@ -13,7 +13,7 @@ export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   subject: string;
 
   @Column()
