@@ -8,12 +8,17 @@ import { StandardExceptionFilter, StandardResponseInterceptor } from './common';
 import { ConfigService } from '@nestjs/config';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
   app.set('trust proxy', true);
+
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/static/',
+  });
 
   const allowedOrigins = configService.get<string>('CORS_ALLOWED_SITES');
   const corsOptions: CorsOptions = {

@@ -29,7 +29,7 @@ export class BatchesRepository {
   async findWithFilters(
     query: GetBatchesQueryDto,
   ): Promise<PaginatedResponseDto<Batch>> {
-    const { page = 1, limit = 10, search } = query;
+    const { page = 1, limit = 10, search, teacherId, studentId } = query;
     const skip = (page - 1) * limit;
 
     const qb = this.repo
@@ -38,6 +38,7 @@ export class BatchesRepository {
       .leftJoinAndSelect('batch.classroom', 'classroom')
       .leftJoinAndSelect('batch.course', 'course')
       .leftJoinAndSelect('batch.enrollments', 'enrollments')
+      .leftJoinAndSelect('enrollments.student', 'student')
       .leftJoinAndSelect('batch.assignments', 'assignments')
       .leftJoinAndSelect('batch.exams', 'exams')
       .leftJoinAndSelect('batch.timetables', 'timetables')
@@ -50,6 +51,18 @@ export class BatchesRepository {
     if (search) {
       qb.andWhere('(batch.name ILIKE :search)', {
         search: `%${search}%`,
+      });
+    }
+
+    if (studentId) {
+      qb.andWhere('(student.id = :id)', {
+        id: `${studentId}`,
+      });
+    }
+
+    if (teacherId) {
+      qb.andWhere('(teacher.id = :id)', {
+        id: `${teacherId}`,
       });
     }
 
@@ -73,14 +86,21 @@ export class BatchesRepository {
   async findById(id: number): Promise<Batch | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['course', 'teacher', 'classroom'],
+      relations: ['course', 'teacher', 'classroom', 'enrollments'],
+    });
+  }
+
+  async findByTeacherId(id: number): Promise<Batch[]> {
+    return this.repo.find({
+      where: { teacher: { id } },
+      relations: ['course', 'teacher', 'classroom', 'enrollments'],
     });
   }
 
   async findByName(name: string): Promise<Batch | null> {
     return this.repo.findOne({
       where: { name },
-      relations: ['course', 'teacher', 'classroom'],
+      relations: ['course', 'teacher', 'classroom', 'enrollments'],
     });
   }
 

@@ -39,10 +39,10 @@ import { UsersModule } from './modules/users/users.module';
 import { MediasModule } from './modules/medias/medias.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { StudentsModule } from './modules/students/students.module';
+import { CalendarsModule } from './modules/calendars/calendars.module';
 
 @Module({
   imports: [
-    // Load configuration globally
     ConfigModule.forRoot({
       envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`],
       cache: true,
@@ -109,6 +109,8 @@ import { StudentsModule } from './modules/students/students.module';
     AnnouncementsModule,
 
     PaymentsModule,
+
+    CalendarsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -30,12 +30,15 @@ export class StudentsRepository {
   async findWithFilters(
     query: GetStudentsQueryDto,
   ): Promise<PaginatedResponseDto<Student>> {
-    const { page = 1, limit = 10, search } = query;
+    const { page = 1, limit = 10, search, teacherId } = query;
     const skip = (page - 1) * limit;
 
     const qb = this.repo
       .createQueryBuilder('student')
       .leftJoinAndSelect('student.user', 'user')
+      .leftJoinAndSelect('student.enrollments', 'enrollments')
+      .leftJoinAndSelect('enrollments.batch', 'batch')
+      .leftJoinAndSelect('batch.teacher', 'teacher')
       .orderBy('student.id', 'DESC')
       .skip(skip)
       .take(limit);
@@ -47,6 +50,12 @@ export class StudentsRepository {
           search: `%${search}%`,
         },
       );
+    }
+
+    if (teacherId) {
+      qb.andWhere('(teacher.id = :id)', {
+        id: `${teacherId}`,
+      });
     }
 
     const [data, totalItems] = await qb.getManyAndCount();

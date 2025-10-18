@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetStudentsQueryDto {
@@ -7,6 +7,12 @@ export class GetStudentsQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ description: 'Search by teacher' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  teacherId?: number;
 
   @ApiPropertyOptional({ description: 'Page number (default: 1)' })
   @IsOptional()

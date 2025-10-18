@@ -52,9 +52,6 @@ export class Teacher {
   @OneToMany(() => Batch, (batch) => batch.teacher)
   batches: Batch[];
 
-  @ManyToMany(() => Assignment, (assignment) => assignment.teacher)
-  assignments: Assignment[];
-
   @OneToMany(() => Timetable, (timetable) => timetable.teacher)
   timetables: Timetable[];
 }

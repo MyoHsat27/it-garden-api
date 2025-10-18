@@ -1,3 +1,4 @@
 export * from './create-assignment.dto';
 export * from './update-assignment.dto';
 export * from './assignment-response.dto';
+export * from './get-assignments-query.dto';

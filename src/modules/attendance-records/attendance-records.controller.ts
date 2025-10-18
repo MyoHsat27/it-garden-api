@@ -3,61 +3,54 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Param,
   Body,
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { AttendanceRecordsService } from './attendance-records.service';
-import { CreateAttendanceRecordDto, UpdateAttendanceRecordDto } from './dto';
 import {
-  CreateAttendanceRecordDecorator,
-  DeleteAttendanceRecordDecorator,
-  GetAllAttendanceRecordsDecorator,
-  GetAttendanceRecordByIdDecorator,
-  UpdateAttendanceRecordDecorator,
-} from './decorators';
+  CreateAttendanceSessionDto,
+  GetTimetableSessionQueryDto,
+  TimetableSessionDto,
+  UpdateAttendanceRecordDto,
+} from './dto';
+import { UpdateAttendanceRecordDecorator } from './decorators';
 import { JwtAuthGuard } from '../auth/guards';
+import { PaginatedResponseDto } from '../../common';
 
-@Controller('attendance-records')
+@Controller('attendances')
 @UseGuards(JwtAuthGuard)
 export class AttendanceRecordsController {
   constructor(private readonly service: AttendanceRecordsService) {}
 
-  @Post()
-  @CreateAttendanceRecordDecorator()
+  @Get('teachers/:teacherId/sessions')
+  @HttpCode(HttpStatus.OK)
+  async getTeacherSessions(
+    @Param('teacherId') teacherId: number,
+    @Query() query: GetTimetableSessionQueryDto,
+  ): Promise<PaginatedResponseDto<TimetableSessionDto>> {
+    return this.service.getTeacherTimetableSessions(Number(teacherId), query);
+  }
+
+  @Post('sessions/:sessionId/generate')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateAttendanceRecordDto) {
-    return this.service.create(dto);
+  async generateRecords(@Param('sessionId') sessionId: string) {
+    return this.service.generateAttendanceRecords(sessionId);
   }
 
-  @Get()
-  @GetAllAttendanceRecordsDecorator()
+  @Get('sessions/:sessionId/records')
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.service.findAll();
+  async getRecords(@Param('sessionId') sessionId: string) {
+    return this.service.getRecordsForSession(sessionId);
   }
 
-  @Get(':id')
-  @GetAttendanceRecordByIdDecorator()
-  @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: number) {
-    return this.service.findOne(id);
-  }
-
-  @Put(':id')
+  @Put('records')
   @UpdateAttendanceRecordDecorator()
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: number, @Body() dto: UpdateAttendanceRecordDto) {
-    return this.service.update(id, dto);
-  }
-
-  @Delete(':id')
-  @DeleteAttendanceRecordDecorator()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: number) {
-    return this.service.remove(id);
+  update(@Body() dto: UpdateAttendanceRecordDto) {
+    return this.service.updateRecord(dto);
   }
 }

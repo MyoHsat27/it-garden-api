@@ -19,10 +19,28 @@ export class SubmissionsRepository {
     return this.repo.find({ relations: ['assignment', 'enrollment'] });
   }
 
-  findById(id: number): Promise<Submission | null> {
+  findByAssignmentAndEnrollment(assignmentId: number, enrollmentId: number) {
+    return this.repo.findOne({
+      where: {
+        assignment: { id: assignmentId },
+        enrollment: { id: enrollmentId },
+      },
+      relations: ['enrollment', 'assignment', 'enrollment.student'],
+    });
+  }
+
+  findById(id: number) {
     return this.repo.findOne({
       where: { id },
-      relations: ['assignment', 'enrollment'],
+      relations: ['enrollment', 'enrollment.student', 'assignment'],
+    });
+  }
+
+  findAllByAssignment(assignmentId: number) {
+    return this.repo.find({
+      where: { assignment: { id: assignmentId } },
+      relations: ['enrollment', 'enrollment.student'],
+      order: { createdAt: 'ASC' },
     });
   }
 

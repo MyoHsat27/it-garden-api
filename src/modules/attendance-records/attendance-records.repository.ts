@@ -10,12 +10,31 @@ export class AttendanceRecordsRepository {
     private readonly repo: Repository<AttendanceRecord>,
   ) {}
 
-  create(record: AttendanceRecord) {
+  create(record: Partial<AttendanceRecord>) {
     return this.repo.save(record);
+  }
+
+  async bulkCreate(records: Partial<AttendanceRecord>[]) {
+    const entities = this.repo.create(records);
+    return this.repo.save(entities);
   }
 
   findAll(): Promise<AttendanceRecord[]> {
     return this.repo.find({ relations: ['enrollment', 'timetable'] });
+  }
+
+  async findForTimetableAndDate(timetableId: number, date: string) {
+    return this.repo.find({
+      where: { timetable: { id: timetableId }, date: new Date(date) },
+      relations: ['enrollment', 'enrollment.student', 'timetable'],
+      order: { id: 'ASC' },
+    });
+  }
+
+  async findByEnrollmentAndDate(enrollmentId: number, date: string) {
+    return this.repo.findOne({
+      where: { enrollment: { id: enrollmentId }, date: new Date(date) },
+    });
   }
 
   async findById(id: number): Promise<AttendanceRecord | null> {

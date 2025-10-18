@@ -27,12 +27,15 @@ export class PaymentsRepository {
   async findWithFilters(
     query: GetPaymentsQueryDto,
   ): Promise<PaginatedResponseDto<Payment>> {
-    const { page = 1, limit = 10, search } = query;
+    const { page = 1, limit = 10, search, studentId } = query;
     const skip = (page - 1) * limit;
 
     const qb = this.repo
       .createQueryBuilder('payment')
       .leftJoinAndSelect('payment.enrollment', 'enrollment')
+      .leftJoinAndSelect('enrollment.student', 'student')
+      .leftJoinAndSelect('enrollment.batch', 'batch')
+      .leftJoinAndSelect('batch.course', 'course')
       .orderBy('payment.id', 'DESC')
       .skip(skip)
       .take(limit);
@@ -40,6 +43,12 @@ export class PaymentsRepository {
     if (search) {
       qb.andWhere('(payment.name ILIKE :search)', {
         search: `%${search}%`,
+      });
+    }
+
+    if (studentId) {
+      qb.andWhere('(student.id = :id)', {
+        id: `${studentId}`,
       });
     }
 

@@ -1,4 +1,5 @@
 import { Batch } from '../../batches/entities';
+import { Exam } from '../../exams/entities';
 import { Timetable } from '../../timetables/entities';
 import {
   Entity,
@@ -25,6 +26,9 @@ export class Classroom {
 
   @OneToMany(() => Batch, (batch) => batch.classroom)
   batches: Batch[];
+
+  @OneToMany(() => Exam, (exam) => exam.classroom)
+  exams: Exam[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

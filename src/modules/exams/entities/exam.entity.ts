@@ -1,4 +1,5 @@
 import { Batch } from '../../batches/entities';
+import { Classroom } from '../../classrooms/entities';
 import { ExamResult } from '../../exam-results/entities';
 import {
   Entity,
@@ -20,6 +21,18 @@ export class Exam {
 
   @Column({ type: 'date' })
   examDate: Date;
+
+  @ManyToOne(() => Classroom, (classroom) => classroom.batches, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  classroom: Classroom;
+
+  @Column('time')
+  startTime: string;
+
+  @Column('time')
+  endTime: string;
 
   @ManyToOne(() => Batch, (batch) => batch.exams)
   batch: Batch;

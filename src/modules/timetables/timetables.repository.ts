@@ -23,7 +23,14 @@ export class TimetablesRepository {
   async findById(id: number): Promise<Timetable | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['batch', 'teacher', 'classroom', 'timeSlot'],
+      relations: ['batch', 'batch.course', 'teacher', 'classroom', 'timeSlot'],
+    });
+  }
+
+  async findByTeacherId(id: number): Promise<Timetable[]> {
+    return this.repo.find({
+      where: { teacher: { id } },
+      relations: ['batch', 'batch.course', 'teacher', 'classroom', 'timeSlot'],
     });
   }
 
@@ -31,7 +38,6 @@ export class TimetablesRepository {
     await this.repo.delete(id);
   }
 
-  // Optional helper to check conflicts, but no exceptions thrown here
   async findConflict(
     batchId: number,
     teacherId: number,

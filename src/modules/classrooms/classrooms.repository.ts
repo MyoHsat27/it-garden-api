@@ -25,23 +25,6 @@ export class ClassroomsRepository {
     return this.repo.find({ order: { createdAt: 'DESC' } });
   }
 
-  // async checkClassroomConflict(
-  //   classroomId: number,
-  //   dayOfWeek: number,
-  //   timeSlotId: number,
-  // ): Promise<boolean> {
-  //   const conflict = await this.timetableRepo.findOne({
-  //     where: {
-  //       dayOfWeek,
-  //       timeSlot: { id: timeSlotId },
-  //       batch: { classroom: { id: classroomId } },
-  //     },
-  //     relations: ['batch', 'timeSlot'],
-  //   });
-
-  //   return !!conflict;
-  // }
-
   async checkClassroomConflict(
     classroomId: number,
     dayOfWeek: number,

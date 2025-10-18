@@ -6,7 +6,7 @@ import { StorageStrategy } from './storage.interface';
 
 @Injectable()
 export class LocalStorageStrategy implements StorageStrategy {
-  private readonly uploadRoot = join(__dirname, '..', '..', 'uploads');
+  private readonly uploadRoot = join(process.cwd(), 'uploads');
 
   async upload(
     file: Express.Multer.File,
@@ -20,8 +20,13 @@ export class LocalStorageStrategy implements StorageStrategy {
 
     await fs.writeFile(filePath, file.buffer);
 
-    const url = `http://localhost:3000/static/${path}/${fileName}`;
+    const url = `${process.env.APP_URL ?? 'http://localhost:3000'}/static/${
+      path ? path + '/' : ''
+    }${fileName}`;
 
-    return { url, key: `${path}/${fileName}` };
+    return {
+      url,
+      key: path ? `${path}/${fileName}` : fileName,
+    };
   }
 }

@@ -17,6 +17,10 @@ export class AttendanceRecordResponseDto {
 
   @ApiProperty()
   @Expose()
+  studentName: string;
+
+  @ApiProperty()
+  @Expose()
   date: string;
 
   @ApiProperty()
@@ -28,5 +32,13 @@ export class AttendanceRecordResponseDto {
     enum: AttendanceRecordStatus,
   })
   @Expose()
-  gender: AttendanceRecordStatus;
+  status: AttendanceRecordStatus;
+
+  @ApiProperty()
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty()
+  @Expose()
+  updatedAt: Date;
 }

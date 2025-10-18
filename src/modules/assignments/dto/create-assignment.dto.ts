@@ -12,18 +12,13 @@ export class CreateAssignmentDto {
 
   @ApiProperty()
   @IsDateString()
+  startDate: Date;
+
+  @ApiProperty()
+  @IsDateString()
   dueDate: Date;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  attachmentUrl?: string;
-
-  @ApiProperty()
-  @IsNumber()
-  teacherId: number;
-
-  @ApiProperty()
-  @IsNumber()
-  batchId: number;
+  batchId: string;
 }

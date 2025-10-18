@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { EnrollmentResponseDto } from '../../enrollments/dto';
 import { PaymentMethod } from '../../../common';
 
@@ -9,6 +9,7 @@ export class PaymentResponseDto {
   id: number;
 
   @ApiProperty({ type: () => EnrollmentResponseDto })
+  @Type(() => EnrollmentResponseDto)
   @Expose()
   enrollment: EnrollmentResponseDto;
 

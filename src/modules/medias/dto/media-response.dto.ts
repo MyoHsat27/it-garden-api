@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { MediaType } from '../../../common';
 
-export class MediaDto {
+export class MediaResponseDto {
   @ApiProperty({ example: 1 })
   @Expose()
   id: number;
@@ -14,6 +14,10 @@ export class MediaDto {
   @ApiProperty({ enum: MediaType, example: MediaType.IMAGE })
   @Expose()
   type: MediaType;
+
+  @ApiProperty()
+  @Expose()
+  mimeType: string;
 
   @ApiProperty({ required: false, example: 'A vibrant abstract painting.' })
   @Expose()

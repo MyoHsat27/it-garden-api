@@ -5,7 +5,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { Assignment } from '../../assignments/entities';
 
 @Entity('medias')
 export class Media {
@@ -42,4 +44,7 @@ export class Media {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToOne(() => Assignment, (assignment) => assignment.media)
+  assignment: Assignment;
 }

@@ -15,6 +15,8 @@ import { ClassroomsRepository } from '../classrooms/classrooms.repository';
 import { TimeSlotsRepository } from '../time-slots/time-slots.repository';
 import { CoursesRepository } from '../courses/courses.repository';
 import { Timetable } from '../timetables/entities';
+import { User } from '../users/entities';
+import { UserRole } from '../users/enums';
 
 @Injectable()
 export class BatchesService {
@@ -26,51 +28,25 @@ export class BatchesService {
     private readonly timeSlotRepo: TimeSlotsRepository,
   ) {}
 
-  // async create(dto: CreateBatchDto): Promise<Batch> {
-  //   const existingBatch = await this.repository.findByName(dto.name);
-  //   if (existingBatch)
-  //     throw new BadRequestException(`Batch ${dto.name} already exists`);
-
-  //   const course = await this.repository.findCourseById(dto.courseId);
-  //   if (!course)
-  //     throw new NotFoundException(`Course with id ${dto.courseId} not found`);
-
-  //   const teacher = await this.repository.findTeacherById(dto.teacherId);
-  //   if (!teacher)
-  //     throw new NotFoundException(`Teacher with id ${dto.teacherId} not found`);
-
-  //   return this.repository.create({
-  //     name: dto.name,
-  //     description: dto.description,
-  //     course,
-  //     teacher,
-  //   });
-  // }
-
   async create(dto: CreateBatchDto): Promise<Batch> {
-    // Check duplicate batch
     const existingBatch = await this.repo.findByName(dto.name);
     if (existingBatch)
       throw new BadRequestException(`Batch ${dto.name} already exists`);
 
-    // Validate course
     const course = await this.courseRepo.findById(dto.courseId);
     if (!course)
       throw new NotFoundException(`Course with id ${dto.courseId} not found`);
 
-    // Validate teacher
     const teacher = await this.teacherRepo.findById(dto.teacherId);
     if (!teacher)
       throw new NotFoundException(`Teacher with id ${dto.teacherId} not found`);
 
-    // Validate classroom
     const classroom = await this.classroomRepo.findById(dto.classroomId);
     if (!classroom)
       throw new NotFoundException(
         `Classroom with id ${dto.classroomId} not found`,
       );
 
-    // Validate timetables
     for (const entry of dto.timetables) {
       const timeSlot = await this.timeSlotRepo.findById(entry.timeSlotId);
       if (!timeSlot) {
@@ -79,7 +55,6 @@ export class BatchesService {
         );
       }
 
-      // Conflict check - teacher busy?
       const teacherConflict = await this.teacherRepo.checkTeacherConflict(
         dto.teacherId,
         entry.dayOfWeek,
@@ -88,16 +63,11 @@ export class BatchesService {
         new Date(dto.endDate),
       );
       if (teacherConflict) {
-        const logger = new Logger('test');
-        logger.log(
-          new Date(teacherConflict.batch.startDate).toLocaleDateString(),
-        );
         throw new BadRequestException(
           `Teacher (${teacher.fullName}) already has a class (${teacherConflict.batch.name}) from ${new Date(teacherConflict.batch.startDate).toLocaleDateString()} to ${new Date(teacherConflict.batch.endDate).toLocaleDateString()} on ${dayOfWeek[entry.dayOfWeek].label ?? `day ${entry.dayOfWeek}`} [${formatTimeAMPM(timeSlot.startTime)} - ${formatTimeAMPM(timeSlot.endTime)}]`,
         );
       }
 
-      // Conflict check - classroom busy?
       const classroomConflict = await this.classroomRepo.checkClassroomConflict(
         dto.classroomId,
         entry.dayOfWeek,
@@ -106,15 +76,12 @@ export class BatchesService {
         new Date(dto.endDate),
       );
       if (classroomConflict) {
-        const logger = new Logger('test2');
-        logger.log(classroomConflict);
         throw new BadRequestException(
           `Classroom (${classroom.name}) already booked by batch (${classroomConflict.batch.name}) from ${new Date(classroomConflict.batch.startDate).toLocaleDateString()} to ${new Date(classroomConflict.batch.endDate).toLocaleDateString()} on ${dayOfWeek[entry.dayOfWeek].label ?? `day ${entry.dayOfWeek}`} [${formatTimeAMPM(timeSlot.startTime)} - ${formatTimeAMPM(timeSlot.endTime)}]`,
         );
       }
     }
 
-    // Save batch with relations
     return this.repo.create({
       name: dto.name,
       description: dto.description,
@@ -135,8 +102,13 @@ export class BatchesService {
     });
   }
 
-  async findAll(): Promise<Batch[]> {
-    const batches = await this.repo.findAll();
+  async findAll(user: User): Promise<Batch[]> {
+    let batches: Batch[] = [];
+    if (user.userRole === UserRole.TEACHER && user.teacherProfile) {
+      batches = await this.repo.findByTeacherId(user.teacherProfile.id);
+    } else {
+      batches = await this.repo.findAll();
+    }
     const batchesWithSpots = batches.map((batch) => ({
       ...batch,
       spotsLeft: batch.classroom.capacity - batch.enrollments.length,
@@ -196,7 +168,7 @@ export class BatchesService {
 
     return this.repo.create(batch);
   }
-
+  b;
   async remove(id: number): Promise<void> {
     const affected = await this.repo.delete(id);
     if (affected === 0) {

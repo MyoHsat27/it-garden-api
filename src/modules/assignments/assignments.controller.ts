@@ -8,6 +8,10 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UploadedFile,
+  UseInterceptors,
+  Query,
+  Logger,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
@@ -19,6 +23,9 @@ import {
   GetAssignmentByIdDecorator,
   UpdateAssignmentDecorator,
 } from './decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AssignmentResponseDto, GetAssignmentsQueryDto } from './dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('assignments')
 export class AssignmentsController {
@@ -26,9 +33,13 @@ export class AssignmentsController {
 
   @Post()
   @CreateAssignmentDecorator()
+  @UseInterceptors(FileInterceptor('attachment'))
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateAssignmentDto) {
-    return this.service.create(dto);
+  create(
+    @Body() dto: CreateAssignmentDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<AssignmentResponseDto> {
+    return this.service.createAssignment(dto, file);
   }
 
   @Get()
@@ -36,6 +47,14 @@ export class AssignmentsController {
   @HttpCode(HttpStatus.OK)
   findAll() {
     return this.service.findAll();
+  }
+
+  @Get('filtered')
+  @HttpCode(HttpStatus.OK)
+  async GetAllAssignmentsWithFilters(
+    @Query() query: GetAssignmentsQueryDto,
+  ): Promise<PaginatedResponseDto<AssignmentResponseDto>> {
+    return this.service.findAllAssignmentsWithFilters(query);
   }
 
   @Get(':id')
@@ -47,9 +66,10 @@ export class AssignmentsController {
 
   @Put(':id')
   @UpdateAssignmentDecorator()
+  @UseInterceptors(FileInterceptor('attachment'))
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: number, @Body() dto: UpdateAssignmentDto) {
-    return this.service.update(id, dto);
+    return this.service.updateAssignment(id, dto);
   }
 
   @Delete(':id')

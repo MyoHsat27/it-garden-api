@@ -1,8 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean } from 'class-validator';
+import { IsBoolean, IsNumber } from 'class-validator';
 
 export class UpdateAttendanceRecordDto {
   @ApiProperty()
   @IsBoolean()
   present: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  id: number;
 }

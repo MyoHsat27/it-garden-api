@@ -8,7 +8,6 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  Patch,
   Put,
   Query,
   Logger,
@@ -26,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guards';
 import { plainToInstance } from 'class-transformer';
 import { GetBatchesQueryDto } from './dto/get-batches-query.dto';
 import { PaginatedResponseDto } from '../../common';
+import { CurrentUser } from '../users/decorators';
 
 @Controller('batches')
 @UseGuards(JwtAuthGuard)
@@ -43,8 +43,8 @@ export class BatchesController {
   @Get()
   @GetAllBatchesDecorator()
   @HttpCode(HttpStatus.OK)
-  async findAll(): Promise<BatchResponseDto[]> {
-    const batches = await this.service.findAll();
+  async findAll(@CurrentUser() user: any): Promise<BatchResponseDto[]> {
+    const batches = await this.service.findAll(user);
     return plainToInstance(BatchResponseDto, batches);
   }
 

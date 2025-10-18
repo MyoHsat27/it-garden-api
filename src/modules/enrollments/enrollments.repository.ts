@@ -66,6 +66,13 @@ export class EnrollmentsRepository {
     });
   }
 
+  findByBatchId(id: number): Promise<Enrollment[]> {
+    return this.repo.find({
+      where: { batch: { id } },
+      relations: ['student', 'batch', 'batch.course', 'payment'],
+    });
+  }
+
   async update(enrollment: Enrollment): Promise<Enrollment> {
     return this.repo.save(enrollment);
   }

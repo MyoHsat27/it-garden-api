@@ -8,8 +8,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
-import { Teacher } from '../../teachers/entities';
+import { Media } from '../../medias/entities';
 
 @Entity('assignments')
 export class Assignment {
@@ -22,17 +24,22 @@ export class Assignment {
   @Column('text')
   description: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'date', name: 'start_date' })
+  startDate: Date;
+
+  @Column({ type: 'date', name: 'due_date' })
   dueDate: Date;
-
-  @Column({ nullable: true })
-  attachmentUrl?: string;
-
-  @ManyToOne(() => Teacher, (teacher) => teacher.assignments)
-  teacher: Teacher;
 
   @ManyToOne(() => Batch, (batch) => batch.assignments, { onDelete: 'CASCADE' })
   batch: Batch;
+
+  @OneToOne(() => Media, (media) => media.assignment, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'media_id' })
+  media?: Media | null;
 
   @OneToMany(() => Submission, (submission) => submission.assignment)
   submissions: Submission[];

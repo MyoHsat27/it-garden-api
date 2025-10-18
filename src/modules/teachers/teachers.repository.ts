@@ -38,23 +38,6 @@ export class TeachersRepository {
     });
   }
 
-  // async checkTeacherConflict(
-  //   teacherId: number,
-  //   dayOfWeek: number,
-  //   timeSlotId: number,
-  // ): Promise<boolean> {
-  //   const conflict = await this.timetableRepo.findOne({
-  //     where: {
-  //       dayOfWeek,
-  //       timeSlot: { id: timeSlotId },
-  //       batch: { teacher: { id: teacherId } },
-  //     },
-  //     relations: ['batch', 'timeSlot'],
-  //   });
-
-  //   return !!conflict;
-  // }
-
   async checkTeacherConflict(
     teacherId: number,
     dayOfWeek: number,
@@ -72,11 +55,9 @@ export class TeachersRepository {
       .andWhere('batch.status != :completed', {
         completed: BatchStatus.COMPLETED,
       })
-      .andWhere(
-        // overlap check: batch start <= new end && batch end >= new start
-        '(batch.startDate IS NULL OR batch.startDate <= :newEndDate)',
-        { newEndDate },
-      )
+      .andWhere('(batch.startDate IS NULL OR batch.startDate <= :newEndDate)', {
+        newEndDate,
+      })
       .andWhere('(batch.endDate IS NULL OR batch.endDate >= :newStartDate)', {
         newStartDate,
       })
@@ -131,8 +112,6 @@ export class TeachersRepository {
 
   async softDeleteTeacher(id: number) {
     const teacher = await this.findById(id);
-    const logger = new Logger('TEST');
-    logger.log(teacher);
     if (teacher) await this.repo.softRemove(teacher);
   }
 }
