@@ -30,6 +30,7 @@ export class EnrollmentsRepository {
       .createQueryBuilder('enrollment')
       .leftJoinAndSelect('enrollment.student', 'student')
       .leftJoinAndSelect('enrollment.batch', 'batch')
+      .leftJoinAndSelect('batch.course', 'course')
       .leftJoinAndSelect('enrollment.payment', 'payment')
       .orderBy('enrollment.id', 'DESC')
       .skip(skip)
@@ -61,7 +62,7 @@ export class EnrollmentsRepository {
   findById(id: number): Promise<Enrollment | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['student', 'batch'],
+      relations: ['student', 'batch', 'batch.course', 'payment'],
     });
   }
 

@@ -8,7 +8,7 @@ export class TimeSlotResponseDto {
 
   @ApiProperty()
   @Expose()
-  dayOfWeek: number;
+  name: string;
 
   @ApiProperty()
   @Expose()

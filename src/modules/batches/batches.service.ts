@@ -9,39 +9,143 @@ import { BatchResponseDto, CreateBatchDto, UpdateBatchDto } from './dto';
 import { Batch } from './entities/batch.entity';
 import { GetBatchesQueryDto } from './dto/get-batches-query.dto';
 import { plainToInstance } from 'class-transformer';
-import { PaginatedResponseDto } from '../../common';
+import { dayOfWeek, formatTimeAMPM, PaginatedResponseDto } from '../../common';
+import { TeachersRepository } from '../teachers/teachers.repository';
+import { ClassroomsRepository } from '../classrooms/classrooms.repository';
+import { TimeSlotsRepository } from '../time-slots/time-slots.repository';
+import { CoursesRepository } from '../courses/courses.repository';
+import { Timetable } from '../timetables/entities';
 
 @Injectable()
 export class BatchesService {
-  constructor(private readonly repository: BatchesRepository) {}
+  constructor(
+    private readonly repo: BatchesRepository,
+    private readonly teacherRepo: TeachersRepository,
+    private readonly classroomRepo: ClassroomsRepository,
+    private readonly courseRepo: CoursesRepository,
+    private readonly timeSlotRepo: TimeSlotsRepository,
+  ) {}
+
+  // async create(dto: CreateBatchDto): Promise<Batch> {
+  //   const existingBatch = await this.repository.findByName(dto.name);
+  //   if (existingBatch)
+  //     throw new BadRequestException(`Batch ${dto.name} already exists`);
+
+  //   const course = await this.repository.findCourseById(dto.courseId);
+  //   if (!course)
+  //     throw new NotFoundException(`Course with id ${dto.courseId} not found`);
+
+  //   const teacher = await this.repository.findTeacherById(dto.teacherId);
+  //   if (!teacher)
+  //     throw new NotFoundException(`Teacher with id ${dto.teacherId} not found`);
+
+  //   return this.repository.create({
+  //     name: dto.name,
+  //     description: dto.description,
+  //     course,
+  //     teacher,
+  //   });
+  // }
 
   async create(dto: CreateBatchDto): Promise<Batch> {
-    const existingBatch = await this.repository.findByName(dto.name);
+    // Check duplicate batch
+    const existingBatch = await this.repo.findByName(dto.name);
     if (existingBatch)
       throw new BadRequestException(`Batch ${dto.name} already exists`);
 
-    const course = await this.repository.findCourseById(dto.courseId);
+    // Validate course
+    const course = await this.courseRepo.findById(dto.courseId);
     if (!course)
       throw new NotFoundException(`Course with id ${dto.courseId} not found`);
 
-    const teacher = await this.repository.findTeacherById(dto.teacherId);
+    // Validate teacher
+    const teacher = await this.teacherRepo.findById(dto.teacherId);
     if (!teacher)
       throw new NotFoundException(`Teacher with id ${dto.teacherId} not found`);
 
-    return this.repository.create({
+    // Validate classroom
+    const classroom = await this.classroomRepo.findById(dto.classroomId);
+    if (!classroom)
+      throw new NotFoundException(
+        `Classroom with id ${dto.classroomId} not found`,
+      );
+
+    // Validate timetables
+    for (const entry of dto.timetables) {
+      const timeSlot = await this.timeSlotRepo.findById(entry.timeSlotId);
+      if (!timeSlot) {
+        throw new NotFoundException(
+          `TimeSlot with id ${entry.timeSlotId} not found`,
+        );
+      }
+
+      // Conflict check - teacher busy?
+      const teacherConflict = await this.teacherRepo.checkTeacherConflict(
+        dto.teacherId,
+        entry.dayOfWeek,
+        entry.timeSlotId,
+        new Date(dto.startDate),
+        new Date(dto.endDate),
+      );
+      if (teacherConflict) {
+        const logger = new Logger('test');
+        logger.log(
+          new Date(teacherConflict.batch.startDate).toLocaleDateString(),
+        );
+        throw new BadRequestException(
+          `Teacher (${teacher.fullName}) already has a class (${teacherConflict.batch.name}) from ${new Date(teacherConflict.batch.startDate).toLocaleDateString()} to ${new Date(teacherConflict.batch.endDate).toLocaleDateString()} on ${dayOfWeek[entry.dayOfWeek].label ?? `day ${entry.dayOfWeek}`} [${formatTimeAMPM(timeSlot.startTime)} - ${formatTimeAMPM(timeSlot.endTime)}]`,
+        );
+      }
+
+      // Conflict check - classroom busy?
+      const classroomConflict = await this.classroomRepo.checkClassroomConflict(
+        dto.classroomId,
+        entry.dayOfWeek,
+        entry.timeSlotId,
+        new Date(dto.startDate),
+        new Date(dto.endDate),
+      );
+      if (classroomConflict) {
+        const logger = new Logger('test2');
+        logger.log(classroomConflict);
+        throw new BadRequestException(
+          `Classroom (${classroom.name}) already booked by batch (${classroomConflict.batch.name}) from ${new Date(classroomConflict.batch.startDate).toLocaleDateString()} to ${new Date(classroomConflict.batch.endDate).toLocaleDateString()} on ${dayOfWeek[entry.dayOfWeek].label ?? `day ${entry.dayOfWeek}`} [${formatTimeAMPM(timeSlot.startTime)} - ${formatTimeAMPM(timeSlot.endTime)}]`,
+        );
+      }
+    }
+
+    // Save batch with relations
+    return this.repo.create({
       name: dto.name,
       description: dto.description,
+      startDate: new Date(dto.startDate),
+      endDate: new Date(dto.endDate),
       course,
       teacher,
+      classroom,
+      timetables: dto.timetables.map(
+        (t) =>
+          ({
+            dayOfWeek: t.dayOfWeek,
+            timeSlot: { id: t.timeSlotId },
+            classroom,
+            teacher,
+          }) as Timetable,
+      ),
     });
   }
 
   async findAll(): Promise<Batch[]> {
-    return this.repository.findAll();
+    const batches = await this.repo.findAll();
+    const batchesWithSpots = batches.map((batch) => ({
+      ...batch,
+      spotsLeft: batch.classroom.capacity - batch.enrollments.length,
+    }));
+    return batchesWithSpots;
   }
 
   async findAllBatchesWithFilters(query: GetBatchesQueryDto) {
-    const result = await this.repository.findWithFilters(query);
+    const result = await this.repo.findWithFilters(query);
 
     const data = result.data.map((a) => plainToInstance(BatchResponseDto, a));
 
@@ -54,7 +158,7 @@ export class BatchesService {
   }
 
   async findOne(id: number): Promise<Batch> {
-    const batch = await this.repository.findById(id);
+    const batch = await this.repo.findById(id);
     if (!batch) {
       throw new NotFoundException(`Batch with id ${id} not found`);
     }
@@ -62,28 +166,25 @@ export class BatchesService {
   }
 
   async update(id: number, dto: UpdateBatchDto): Promise<Batch> {
-    const batch = await this.repository.findById(id);
+    const batch = await this.repo.findById(id);
     if (!batch) throw new NotFoundException(`Batch with id ${id} not found`);
 
     if (dto.name) {
-      const existingBatch = await this.repository.findExisting(
-        dto.name,
-        batch.id,
-      );
+      const existingBatch = await this.repo.findExisting(dto.name, batch.id);
 
       if (existingBatch)
         throw new BadRequestException(`Batch ${dto.name} already exists`);
     }
 
     if (dto.courseId) {
-      const course = await this.repository.findCourseById(dto.courseId);
+      const course = await this.courseRepo.findById(dto.courseId);
       if (!course)
         throw new NotFoundException(`Course with id ${dto.courseId} not found`);
       batch.course = course;
     }
 
     if (dto.teacherId) {
-      const teacher = await this.repository.findTeacherById(dto.teacherId);
+      const teacher = await this.teacherRepo.findById(dto.teacherId);
       if (!teacher) {
         throw new NotFoundException('Teacher not found');
       }
@@ -93,11 +194,11 @@ export class BatchesService {
     if (dto.name !== undefined) batch.name = dto.name;
     if (dto.description !== undefined) batch.description = dto.description;
 
-    return this.repository.create(batch);
+    return this.repo.create(batch);
   }
 
   async remove(id: number): Promise<void> {
-    const affected = await this.repository.delete(id);
+    const affected = await this.repo.delete(id);
     if (affected === 0) {
       throw new NotFoundException(`Batch with id ${id} not found`);
     }

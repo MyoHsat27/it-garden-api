@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { TimeSlotsRepository } from './time-slots.repository';
 import {
@@ -14,6 +18,13 @@ export class TimeSlotsService {
   constructor(private readonly repository: TimeSlotsRepository) {}
 
   async create(dto: CreateTimeSlotDto): Promise<TimeSlotResponseDto> {
+    const existingTimeSlot = await this.repository.findExisting(dto.name);
+
+    if (existingTimeSlot)
+      throw new BadRequestException(
+        `Time Slot ${existingTimeSlot.name} already exists`,
+      );
+
     const timeSlot = await this.repository.createTimeSlot(dto);
     return plainToInstance(TimeSlotResponseDto, timeSlot);
   }
@@ -47,11 +58,33 @@ export class TimeSlotsService {
     id: number,
     dto: UpdateTimeSlotDto,
   ): Promise<TimeSlotResponseDto> {
-    const updated = await this.repository.updateTimeSlot(id, dto);
+    const timeSlot = await this.repository.findById(id);
+    if (!timeSlot)
+      throw new NotFoundException(`Time slot with id ${id} not found`);
+
+    if (dto.name) {
+      const existingTimeSlot = await this.repository.findExisting(
+        dto.name,
+        timeSlot.id,
+      );
+
+      if (existingTimeSlot)
+        throw new BadRequestException(`Time Slot ${dto.name} already exists`);
+    }
+
+    if (timeSlot.timetables && timeSlot.timetables.length > 0) {
+      if (dto.name) {
+        timeSlot.name = dto.name;
+      }
+    } else {
+      Object.assign(timeSlot, dto);
+    }
+
+    const updated = await this.repository.update(timeSlot);
     return plainToInstance(TimeSlotResponseDto, updated);
   }
 
   async remove(id: number): Promise<void> {
-    await this.repository.deleteTimeSlot(id);
+    await this.repository.delete(id);
   }
 }

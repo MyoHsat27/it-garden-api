@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { TimeSlot } from './entities/time-slot.entity';
 import {
   CreateTimeSlotDto,
@@ -21,7 +25,7 @@ export class TimeSlotsRepository {
   }
 
   async findAll(): Promise<TimeSlot[]> {
-    return this.repo.find({ order: { dayOfWeek: 'ASC', startTime: 'ASC' } });
+    return this.repo.find({ order: { id: 'DESC' } });
   }
 
   async findWithFilters(
@@ -59,22 +63,40 @@ export class TimeSlotsRepository {
     };
   }
 
-  async findById(id: number): Promise<TimeSlot> {
-    const timeSlot = await this.repo.findOne({ where: { id } });
-    if (!timeSlot)
-      throw new NotFoundException(`TimeSlot with id ${id} not found`);
-    return timeSlot;
+  async findById(id: number): Promise<TimeSlot | null> {
+    return this.repo.findOne({ where: { id }, relations: ['timetables'] });
   }
 
-  async updateTimeSlot(id: number, dto: UpdateTimeSlotDto): Promise<TimeSlot> {
-    const timeSlot = await this.findById(id);
-    Object.assign(timeSlot, dto);
+  async findByName(name: string): Promise<TimeSlot | null> {
+    return this.repo.findOne({ where: { name } });
+  }
+
+  async findExisting(name: string, id?: number): Promise<TimeSlot | null> {
+    if (id)
+      return this.repo.findOne({
+        where: { name, id: Not(id) },
+        relations: ['timetables'],
+      });
+    else
+      return this.repo.findOne({ where: { name }, relations: ['timetables'] });
+  }
+
+  async update(timeSlot: TimeSlot): Promise<TimeSlot> {
     return this.repo.save(timeSlot);
   }
 
-  async deleteTimeSlot(id: number): Promise<void> {
+  async delete(id: number): Promise<number> {
+    const timeSlot = await this.findById(id);
+    if (!timeSlot) {
+      throw new NotFoundException('Time Slot not found');
+    }
+
+    if (timeSlot.timetables && timeSlot.timetables.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete time slot because it is used.',
+      );
+    }
     const result = await this.repo.delete(id);
-    if (result.affected === 0)
-      throw new NotFoundException(`TimeSlot with id ${id} not found`);
+    return result.affected ?? 0;
   }
 }

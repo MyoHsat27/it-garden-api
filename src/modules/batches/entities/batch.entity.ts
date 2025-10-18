@@ -14,6 +14,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BatchStatus } from '../enums';
+import { Classroom } from '../../classrooms/entities';
 
 @Entity('batches')
 export class Batch {
@@ -25,6 +27,19 @@ export class Batch {
 
   @Column('text')
   description: string;
+
+  @Column({ type: 'date', nullable: true })
+  startDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  endDate: Date;
+
+  @Column({
+    type: 'enum',
+    enum: BatchStatus,
+    default: BatchStatus.FUTURE,
+  })
+  status: BatchStatus;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -41,6 +56,12 @@ export class Batch {
   })
   teacher: Teacher;
 
+  @ManyToOne(() => Classroom, (classroom) => classroom.batches, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  classroom: Classroom;
+
   @OneToMany(() => Enrollment, (enrollment) => enrollment.batch)
   enrollments: Enrollment[];
 
@@ -50,7 +71,10 @@ export class Batch {
   @OneToMany(() => Exam, (exam) => exam.batch)
   exams: Exam[];
 
-  @OneToMany(() => Timetable, (timetable) => timetable.batch)
+  @OneToMany(() => Timetable, (timetable) => timetable.batch, {
+    cascade: true,
+    eager: true,
+  })
   timetables: Timetable[];
 
   @OneToMany(() => Announcement, (announcement) => announcement.batch)

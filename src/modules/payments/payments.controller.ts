@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto, PaymentResponseDto } from './dto';
@@ -18,6 +19,8 @@ import {
   GetAllPaymentsDecorator,
   GetPaymentByIdDecorator,
 } from './decorators';
+import { GetPaymentsQueryDto } from './dto/get-payments-query.dto';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('payments')
 @UseGuards(JwtAuthGuard)
@@ -36,6 +39,15 @@ export class PaymentsController {
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<PaymentResponseDto[]> {
     return this.paymentsService.findAll();
+  }
+
+  @Get('filtered')
+  @GetAllPaymentsDecorator()
+  @HttpCode(HttpStatus.OK)
+  async findAllCoursesWithFilters(
+    @Query() query: GetPaymentsQueryDto,
+  ): Promise<PaginatedResponseDto<PaymentResponseDto>> {
+    return this.paymentsService.findAllPaymentsWithFilters(query);
   }
 
   @Get(':id')

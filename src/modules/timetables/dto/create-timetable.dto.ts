@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, Min } from 'class-validator';
+import { IsInt, Max, Min } from 'class-validator';
 
 export class CreateTimetableDto {
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  dayOfWeek: number;
+
   @ApiProperty()
   @IsInt()
   @Min(1)

@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Teacher } from './entities';
 import { UsersModule } from '../users/users.module';
 import { TeachersRepository } from './teachers.repository';
+import { Timetable } from '../timetables/entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Teacher]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Teacher, Timetable]), UsersModule],
   controllers: [TeachersController],
   providers: [TeachersService, TeachersRepository],
   exports: [TeachersService, TeachersRepository],

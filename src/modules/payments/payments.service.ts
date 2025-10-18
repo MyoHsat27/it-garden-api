@@ -3,7 +3,8 @@ import { PaymentsRepository } from './payments.repository';
 import { CreatePaymentDto, PaymentResponseDto } from './dto';
 import { plainToInstance } from 'class-transformer';
 import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
-import { PaymentStatus } from '../../common';
+import { PaginatedResponseDto, PaymentStatus } from '../../common';
+import { GetPaymentsQueryDto } from './dto/get-payments-query.dto';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -42,6 +43,19 @@ export class PaymentsService {
         ...p,
         enrollmentId: p.enrollment.id,
       }),
+    );
+  }
+
+  async findAllPaymentsWithFilters(query: GetPaymentsQueryDto) {
+    const result = await this.repository.findWithFilters(query);
+
+    const data = result.data.map((a) => plainToInstance(PaymentResponseDto, a));
+
+    return new PaginatedResponseDto(
+      data,
+      result.totalItems,
+      result.page,
+      result.limit,
     );
   }
 

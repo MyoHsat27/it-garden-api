@@ -16,9 +16,6 @@ export class TimeSlot {
   @Column()
   name: string;
 
-  @Column()
-  dayOfWeek: number;
-
   @Column('time')
   startTime: string;
 

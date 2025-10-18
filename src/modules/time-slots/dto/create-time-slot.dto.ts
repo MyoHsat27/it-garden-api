@@ -6,12 +6,6 @@ export class CreateTimeSlotDto {
   @IsString()
   name: string;
 
-  @ApiProperty()
-  @IsInt()
-  @Min(0)
-  @Max(6)
-  dayOfWeek: number;
-
   @ApiProperty({ example: '13:00:00' })
   @IsString()
   startTime: string;

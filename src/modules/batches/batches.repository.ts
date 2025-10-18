@@ -12,12 +12,6 @@ export class BatchesRepository {
   constructor(
     @InjectRepository(Batch)
     private readonly repo: Repository<Batch>,
-
-    @InjectRepository(Course)
-    private readonly courseRepo: Repository<Course>,
-
-    @InjectRepository(Teacher)
-    private readonly teacherRepo: Repository<Teacher>,
   ) {}
 
   async create(batch: Partial<Batch>): Promise<Batch> {
@@ -27,7 +21,7 @@ export class BatchesRepository {
 
   async findAll(): Promise<Batch[]> {
     return this.repo.find({
-      relations: ['course', 'teacher'],
+      relations: ['course', 'teacher', 'classroom', 'enrollments'],
       order: { id: 'DESC' },
     });
   }
@@ -41,11 +35,13 @@ export class BatchesRepository {
     const qb = this.repo
       .createQueryBuilder('batch')
       .leftJoinAndSelect('batch.teacher', 'teacher')
+      .leftJoinAndSelect('batch.classroom', 'classroom')
       .leftJoinAndSelect('batch.course', 'course')
       .leftJoinAndSelect('batch.enrollments', 'enrollments')
       .leftJoinAndSelect('batch.assignments', 'assignments')
       .leftJoinAndSelect('batch.exams', 'exams')
       .leftJoinAndSelect('batch.timetables', 'timetables')
+      .leftJoinAndSelect('timetables.timeSlot', 'timeSlot')
       .leftJoinAndSelect('batch.announcements', 'announcements')
       .orderBy('batch.id', 'DESC')
       .skip(skip)
@@ -77,14 +73,14 @@ export class BatchesRepository {
   async findById(id: number): Promise<Batch | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['course', 'teacher'],
+      relations: ['course', 'teacher', 'classroom'],
     });
   }
 
   async findByName(name: string): Promise<Batch | null> {
     return this.repo.findOne({
       where: { name },
-      relations: ['course', 'teacher'],
+      relations: ['course', 'teacher', 'classroom'],
     });
   }
 
@@ -92,25 +88,17 @@ export class BatchesRepository {
     if (id)
       return this.repo.findOne({
         where: { name, id: Not(id) },
-        relations: ['course', 'teacher'],
+        relations: ['course', 'teacher', 'classroom'],
       });
     else
       return this.repo.findOne({
         where: { name },
-        relations: ['course', 'teacher'],
+        relations: ['course', 'teacher', 'classroom'],
       });
   }
 
   async delete(id: number): Promise<number> {
     const result = await this.repo.delete(id);
     return result.affected ?? 0;
-  }
-
-  async findCourseById(id: number): Promise<Course | null> {
-    return this.courseRepo.findOne({ where: { id } });
-  }
-
-  async findTeacherById(id: number): Promise<Teacher | null> {
-    return this.teacherRepo.findOneBy({ id });
   }
 }

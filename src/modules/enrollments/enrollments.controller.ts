@@ -24,6 +24,7 @@ import {
 } from './decorators/swagger.decorator';
 import { GetEnrollmentsQueryDto } from './dto/get-enrollments-query.dto';
 import { PaginatedResponseDto } from '../../common';
+import { PaidEnrollmentDto } from './dto/paid-enrollment.dto';
 
 @Controller('enrollments')
 export class EnrollmentsController {
@@ -33,6 +34,15 @@ export class EnrollmentsController {
   @CreateEnrollmentDecorator()
   create(@Body() dto: CreateEnrollmentDto): Promise<EnrollmentResponseDto> {
     return this.service.create(dto);
+  }
+
+  @Post(':id/paid')
+  @CreateEnrollmentDecorator()
+  paidEnrollment(
+    @Param('id') id: number,
+    @Body() dto: PaidEnrollmentDto,
+  ): Promise<EnrollmentResponseDto> {
+    return this.service.paidEnrollment(id, dto);
   }
 
   @Get()

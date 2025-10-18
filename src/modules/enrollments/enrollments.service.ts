@@ -16,6 +16,7 @@ import { BatchesRepository } from '../batches/batches.repository';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { PaginatedResponseDto, PaymentStatus } from '../../common';
 import { GetEnrollmentsQueryDto } from './dto/get-enrollments-query.dto';
+import { PaidEnrollmentDto } from './dto/paid-enrollment.dto';
 
 @Injectable()
 export class EnrollmentsService {
@@ -74,6 +75,33 @@ export class EnrollmentsService {
       ...enrollment,
       studentId: student.id,
       batchId: batch.id,
+    });
+  }
+
+  async paidEnrollment(
+    id: number,
+    dto: PaidEnrollmentDto,
+  ): Promise<EnrollmentResponseDto> {
+    const enrollment = await this.repository.findById(id);
+    if (!enrollment) throw new NotFoundException('Enrollment does not exists');
+
+    if (enrollment.feeStatus === PaymentStatus.PAID)
+      throw new BadRequestException('This enrollment is already paid');
+
+    enrollment.feeStatus = PaymentStatus.PAID;
+
+    const updatedEnrollment = await this.repository.save(enrollment);
+
+    const payment = await this.paymentsRepo.create({
+      amount: updatedEnrollment.finalFee,
+      paidAt: new Date(dto.paidAt),
+      paymentMethod: dto.paymentMethod,
+      enrollment: updatedEnrollment,
+    });
+
+    return plainToInstance(EnrollmentResponseDto, {
+      ...updatedEnrollment,
+      payment,
     });
   }
 

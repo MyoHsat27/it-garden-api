@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsInt, IsNumber, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Min,
+} from 'class-validator';
 
 import { PaymentMethod, PaymentStatus } from '../../../common';
 
@@ -20,6 +27,7 @@ export class CreateEnrollmentDto {
 
   @ApiProperty({ enum: PaymentMethod })
   @IsEnum(PaymentMethod)
+  @IsOptional()
   paymentMethod: PaymentMethod;
 
   @ApiProperty()

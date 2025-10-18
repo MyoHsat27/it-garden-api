@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { TeacherResponseDto } from '../../teachers/dto';
 import { ClassroomResponseDto } from '../../classrooms/dto';
 import { TimeSlotResponseDto } from '../../time-slots/dto';
@@ -10,19 +10,27 @@ export class TimetableResponseDto {
   @Expose()
   id: number;
 
-  @ApiProperty({ type: BatchResponseDto })
+  @ApiProperty()
   @Expose()
+  dayOfWeek: number;
+
+  @ApiProperty({ type: () => BatchResponseDto })
+  @Expose()
+  @Type(() => BatchResponseDto)
   batch: BatchResponseDto;
 
-  @ApiProperty({ type: TeacherResponseDto })
+  @ApiProperty({ type: () => TeacherResponseDto })
   @Expose()
+  @Type(() => TeacherResponseDto)
   teacher: TeacherResponseDto;
 
-  @ApiProperty({ type: ClassroomResponseDto })
+  @ApiProperty({ type: () => ClassroomResponseDto })
   @Expose()
+  @Type(() => ClassroomResponseDto)
   classroom: ClassroomResponseDto;
 
   @ApiProperty({ type: TimeSlotResponseDto })
   @Expose()
+  @Type(() => TimeSlotResponseDto)
   timeSlot: TimeSlotResponseDto;
 }

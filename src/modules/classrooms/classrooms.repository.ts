@@ -4,12 +4,16 @@ import { Repository } from 'typeorm';
 import { Classroom } from './entities/classroom.entity';
 import { GetClassroomsQueryDto } from './dto/get-classrooms-query.dto';
 import { PaginatedResponseDto } from '../../common';
+import { Timetable } from '../timetables/entities';
+import { BatchStatus } from '../batches/enums';
 
 @Injectable()
 export class ClassroomsRepository {
   constructor(
     @InjectRepository(Classroom)
     private readonly repo: Repository<Classroom>,
+    @InjectRepository(Timetable)
+    private readonly timetableRepo: Repository<Timetable>,
   ) {}
 
   async create(Classroom: Partial<Classroom>): Promise<Classroom> {
@@ -19,6 +23,51 @@ export class ClassroomsRepository {
 
   async findAll(): Promise<Classroom[]> {
     return this.repo.find({ order: { createdAt: 'DESC' } });
+  }
+
+  // async checkClassroomConflict(
+  //   classroomId: number,
+  //   dayOfWeek: number,
+  //   timeSlotId: number,
+  // ): Promise<boolean> {
+  //   const conflict = await this.timetableRepo.findOne({
+  //     where: {
+  //       dayOfWeek,
+  //       timeSlot: { id: timeSlotId },
+  //       batch: { classroom: { id: classroomId } },
+  //     },
+  //     relations: ['batch', 'timeSlot'],
+  //   });
+
+  //   return !!conflict;
+  // }
+
+  async checkClassroomConflict(
+    classroomId: number,
+    dayOfWeek: number,
+    timeSlotId: number,
+    newStartDate?: Date,
+    newEndDate?: Date,
+  ): Promise<Timetable | null> {
+    const conflict = await this.timetableRepo
+      .createQueryBuilder('timetable')
+      .leftJoinAndSelect('timetable.batch', 'batch')
+      .leftJoinAndSelect('timetable.timeSlot', 'timeSlot')
+      .where('batch.classroomId = :classroomId', { classroomId })
+      .andWhere('timetable.dayOfWeek = :dayOfWeek', { dayOfWeek })
+      .andWhere('timeSlot.id = :timeSlotId', { timeSlotId })
+      .andWhere('batch.status != :completed', {
+        completed: BatchStatus.COMPLETED,
+      })
+      .andWhere('(batch.startDate IS NULL OR batch.startDate <= :newEndDate)', {
+        newEndDate,
+      })
+      .andWhere('(batch.endDate IS NULL OR batch.endDate >= :newStartDate)', {
+        newStartDate,
+      })
+      .getOne();
+
+    return conflict;
   }
 
   async findWithFilters(
