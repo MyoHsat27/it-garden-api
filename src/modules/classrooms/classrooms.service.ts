@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ClassroomsRepository } from './classrooms.repository';
 import {
@@ -59,6 +63,13 @@ export class ClassroomsService {
   }
 
   async remove(id: number): Promise<void> {
+    const classroom = await this.repository.findById(id);
+    if (!classroom) throw new NotFoundException(`Classroom not found`);
+    if (classroom.batches.length > 0)
+      throw new BadGatewayException(
+        `Cannot delete the classroom that has existing schedules`,
+      );
+
     const affected = await this.repository.delete(id);
     if (affected === 0) {
       throw new NotFoundException(`Classroom with id ${id} not found`);

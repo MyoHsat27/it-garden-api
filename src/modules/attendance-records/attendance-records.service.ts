@@ -21,6 +21,7 @@ import { generateTimetableOccurrences } from '../calendars/utils';
 import { format, parseISO } from 'date-fns';
 import { PaginatedResponseDto } from '../../common';
 import { TimetableSessionStatus } from './enums/timetable-session-status.enum';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AttendanceRecordsService {
@@ -58,6 +59,8 @@ export class AttendanceRecordsService {
         );
         const total = records.length;
         const present = records.filter((r) => r.present).length;
+        const token = total > 0 ? records[0].token : undefined;
+        const expiredAt = total > 0 ? records[0].expiresAt : undefined;
 
         sessions.push({
           id: `${tt.id}-${dateStr}`,
@@ -75,6 +78,8 @@ export class AttendanceRecordsService {
               ? TimetableSessionStatus.FINISHED
               : TimetableSessionStatus.PENDING,
           attendanceSummary: total > 0 ? `${present}/${total}` : undefined,
+          token,
+          expiredAt,
         });
       }
     }
@@ -137,6 +142,8 @@ export class AttendanceRecordsService {
       throw new NotFoundException('No enrollments for this batch');
 
     const created: AttendanceRecord[] = [];
+    const token = randomUUID();
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
     for (const en of enrollments) {
       const existing = await this.repository.findByEnrollmentAndDate(
@@ -148,6 +155,8 @@ export class AttendanceRecordsService {
         continue;
       }
       const rec: Partial<AttendanceRecord> = {
+        token,
+        expiresAt,
         enrollment: en,
         timetable,
         date: new Date(date),
@@ -208,6 +217,22 @@ export class AttendanceRecordsService {
       throw new NotFoundException(`Attendance record ${dto.id} not found`);
     record.present = dto.present;
     const updated = await this.repository.update(record);
+    return plainToInstance(AttendanceRecordResponseDto, updated);
+  }
+
+  async markAttendance(token: string, studentId: number) {
+    const record = await this.repository.findByTokenAndStudentId(
+      token,
+      studentId,
+    );
+
+    if (!record || record.expiresAt < new Date()) {
+      throw new BadRequestException('Attendance time is expired');
+    }
+
+    record.present = true;
+    const updated = await this.repository.update(record);
+
     return plainToInstance(AttendanceRecordResponseDto, updated);
   }
 }

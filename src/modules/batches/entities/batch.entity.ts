@@ -47,14 +47,23 @@ export class Batch {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  @Column()
+  courseId: number;
+
   @ManyToOne(() => Course, (course) => course.batches, { onDelete: 'CASCADE' })
   course: Course;
+
+  @Column()
+  teacherId: number;
 
   @ManyToOne(() => Teacher, (teacher) => teacher.batches, {
     onDelete: 'SET NULL',
     nullable: true,
   })
   teacher: Teacher;
+
+  @Column()
+  classroomId: number;
 
   @ManyToOne(() => Classroom, (classroom) => classroom.batches, {
     onDelete: 'SET NULL',

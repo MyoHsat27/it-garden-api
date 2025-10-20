@@ -20,7 +20,7 @@ export class LocalStorageStrategy implements StorageStrategy {
 
     await fs.writeFile(filePath, file.buffer);
 
-    const url = `${process.env.APP_URL ?? 'http://localhost:3000'}/static/${
+    const url = `${process.env.APP_URL ?? 'http://localhost:3000'}/uploads/${
       path ? path + '/' : ''
     }${fileName}`;
 

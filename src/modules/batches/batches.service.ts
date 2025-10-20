@@ -168,8 +168,15 @@ export class BatchesService {
 
     return this.repo.create(batch);
   }
-  b;
+
   async remove(id: number): Promise<void> {
+    const batch = await this.repo.findById(id);
+    if (!batch) throw new NotFoundException(`Batch not found`);
+    if (batch.enrollments.length > 0)
+      throw new BadRequestException(
+        `Cannot delete the batch that has existing enrollments`,
+      );
+
     const affected = await this.repo.delete(id);
     if (affected === 0) {
       throw new NotFoundException(`Batch with id ${id} not found`);

@@ -11,6 +11,10 @@ export class MediaResponseDto {
   @Expose()
   url: string;
 
+  @ApiProperty()
+  @Expose()
+  key: string;
+
   @ApiProperty({ enum: MediaType, example: MediaType.IMAGE })
   @Expose()
   type: MediaType;

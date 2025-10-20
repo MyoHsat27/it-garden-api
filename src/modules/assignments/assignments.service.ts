@@ -1,6 +1,8 @@
+import { User } from './../users/entities/user.entity';
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { AssignmentsRepository } from './assignments.repository';
@@ -12,6 +14,7 @@ import { MediaType, PaginatedResponseDto, validateArchive } from '../../common';
 import { BatchesRepository } from '../batches/batches.repository';
 import { MediasRepository } from '../medias/medias.repository';
 import { StorageService } from '../../infrastructure';
+import { StudentAssignmentResponseDto } from './dto/student-assignment-response.dto';
 
 @Injectable()
 export class AssignmentsService {
@@ -41,10 +44,14 @@ export class AssignmentsService {
 
     if (file) {
       validateArchive(file);
-      const { url } = await this.storageService.upload(file, 'assignments');
+      const { url, key } = await this.storageService.upload(
+        file,
+        'assignments',
+      );
 
       const media = await this.mediasRepository.create({
         url,
+        key,
         type: MediaType.ARCHIVE,
         mimeType: file.mimetype,
         size: file.size,
@@ -73,9 +80,13 @@ export class AssignmentsService {
     if (dto.description !== undefined) assignment.description = dto.description;
 
     if (file) {
-      const { url } = await this.storageService.upload(file, 'assignments');
+      const { url, key } = await this.storageService.upload(
+        file,
+        'assignments',
+      );
       const media = await this.mediasRepository.create({
         url,
+        key,
         type: MediaType.ARCHIVE,
         mimeType: file.mimetype,
         size: file.size,
@@ -109,6 +120,51 @@ export class AssignmentsService {
     const data = result.data.map((a) =>
       plainToInstance(AssignmentResponseDto, a),
     );
+
+    return new PaginatedResponseDto(
+      data,
+      result.totalItems,
+      result.page,
+      result.limit,
+    );
+  }
+
+  // async findAllStudentAssignmentsWithFilters(query: GetAssignmentsQueryDto) {
+  //   const result = await this.repository.findWithStudentFilters(query);
+
+  //   const data = result.data.map((a) =>
+  //     plainToInstance(StudentAssignmentResponseDto, a),
+  //   );
+
+  //   return new PaginatedResponseDto(
+  //     data,
+  //     result.totalItems,
+  //     result.page,
+  //     result.limit,
+  //   );
+  // }
+
+  async findAllStudentAssignmentsWithFilters(query: GetAssignmentsQueryDto) {
+    const result = await this.repository.findWithStudentFilters(query);
+
+    const data = result.data.map((a) => {
+      const submission = a.submissions?.[0] || null;
+      const status = submission ? 'SUBMITTED' : 'PENDING';
+
+      return plainToInstance(StudentAssignmentResponseDto, {
+        id: a.id,
+        title: a.title,
+        description: a.description,
+        startDate: a.startDate,
+        dueDate: a.dueDate,
+        status,
+        media: a.media,
+        submission,
+        courseName: a.batch?.course?.name ?? null,
+        teacherName: a.batch?.teacher?.fullName ?? null,
+        batchName: a.batch?.name ?? null,
+      });
+    });
 
     return new PaginatedResponseDto(
       data,

@@ -12,6 +12,7 @@ import {
   NotFoundException,
   Put,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -79,8 +80,10 @@ export class RolesController {
 
   @Delete(':id')
   @DeleteRoleDecorator()
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string): Promise<void> {
+    const logger = new Logger('tes');
+    logger.log(id);
     return this.rolesService.remove(+id);
   }
 }

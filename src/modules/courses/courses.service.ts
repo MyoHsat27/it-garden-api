@@ -71,9 +71,16 @@ export class CoursesService {
   }
 
   async remove(id: number): Promise<void> {
+    const course = await this.courseRepository.findById(id);
+    if (!course) throw new NotFoundException(`Course not found`);
+    if (course.batches.length > 0)
+      throw new BadRequestException(
+        `Cannot delete the course that has existing batches`,
+      );
+
     const affected = await this.courseRepository.delete(id);
     if (affected === 0) {
-      throw new NotFoundException(`Course with id ${id} not found`);
+      throw new NotFoundException(`Course not found`);
     }
   }
 }

@@ -8,8 +8,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { SubmissionStatus } from '../enums';
+import { Media } from '../../medias/entities';
 
 @Entity('submissions')
 @Index(['assignment', 'enrollment'], { unique: true })
@@ -21,10 +24,7 @@ export class Submission {
   content?: string;
 
   @Column({ nullable: true })
-  fileUrl?: string;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  grade?: number;
+  grade?: string;
 
   @Column({ nullable: true })
   feedback?: string;
@@ -35,11 +35,28 @@ export class Submission {
   @Column({ type: 'date' })
   submittedAt: Date;
 
+  @Column()
+  assignmentId: number;
+
   @ManyToOne(() => Assignment, (assignment) => assignment.submissions)
   assignment: Assignment;
 
+  @Column()
+  enrollmentId: number;
+
   @ManyToOne(() => Enrollment, (enrollment) => enrollment.submissions)
   enrollment: Enrollment;
+
+  @OneToOne(() => Media, (media) => media.submission, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'media_id' })
+  media?: Media | null;
+
+  @Column({ name: 'media_id', nullable: true })
+  mediaId?: number | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

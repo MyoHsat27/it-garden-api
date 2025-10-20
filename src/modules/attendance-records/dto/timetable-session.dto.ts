@@ -31,6 +31,14 @@ export class TimetableSessionDto {
   @Expose()
   classroomName?: string;
 
+  @ApiProperty()
+  @Expose()
+  token?: string;
+
+  @ApiProperty()
+  @Expose()
+  expiredAt?: Date;
+
   @ApiProperty({ example: '2025-10-07' })
   @Expose()
   date: string;

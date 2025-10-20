@@ -36,6 +36,14 @@ export class AttendanceRecordResponseDto {
 
   @ApiProperty()
   @Expose()
+  expiredAt: string;
+
+  @ApiProperty()
+  @Expose()
+  token: string;
+
+  @ApiProperty()
+  @Expose()
   createdAt: Date;
 
   @ApiProperty()

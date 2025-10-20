@@ -24,7 +24,7 @@ export default class AdminSeeder implements Seeder {
     const user = await userFactory.make({
       username: 'superadmin',
       email,
-      password: await CryptoHelper.hashPassword('SuperAdmin@123'),
+      password: await CryptoHelper.hashPassword('yngWIE500'),
       isEmailVerified: true,
     });
     await userRepo.save(user);

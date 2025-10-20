@@ -44,6 +44,16 @@ export class AttendanceRecordsRepository {
     });
   }
 
+  async findByTokenAndStudentId(
+    token: string,
+    studentId: number,
+  ): Promise<AttendanceRecord | null> {
+    return this.repo.findOne({
+      where: { token, enrollment: { student: { id: studentId } } },
+      relations: ['enrollment', 'enrollment.student', 'timetable'],
+    });
+  }
+
   update(record: AttendanceRecord) {
     return this.repo.save(record);
   }

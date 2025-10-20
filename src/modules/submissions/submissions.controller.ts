@@ -3,33 +3,58 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   HttpCode,
   HttpStatus,
   Put,
+  UseInterceptors,
+  UploadedFile,
+  ParseIntPipe,
+  Logger,
+  UseGuards,
 } from '@nestjs/common';
 import { SubmissionsService } from './submissions.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
-import { UpdateSubmissionDto } from './dto/update-submission.dto';
 import {
-  CreateSubmissionDecorator,
-  DeleteSubmissionDecorator,
   GetAllSubmissionsDecorator,
   GetSubmissionByIdDecorator,
-  UpdateSubmissionDecorator,
 } from './decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { GradeSubmissionDto } from './dto/grade-submission.dto';
+import { CurrentUser } from '../users/decorators';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('submissions')
+@UseGuards(JwtAuthGuard)
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
   @Post()
-  @CreateSubmissionDecorator()
+  @UseInterceptors(FileInterceptor('attachment'))
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createSubmissionDto: CreateSubmissionDto) {
-    return this.submissionsService.create(createSubmissionDto);
+  async submit(
+    @CurrentUser() user: any,
+    @Body() dto: CreateSubmissionDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.submissionsService.submitAssignment(
+      user.studentProfile.id,
+      dto,
+      file,
+    );
+  }
+
+  @Get('/assignment/:id')
+  async listSubmissions(@Param('id', ParseIntPipe) id: number) {
+    return this.submissionsService.getSubmissionsForAssignment(id);
+  }
+
+  @Put(':id/grade')
+  async gradeSubmission(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: GradeSubmissionDto,
+  ) {
+    return this.submissionsService.gradeSubmission(id, dto);
   }
 
   @Get()
@@ -44,22 +69,5 @@ export class SubmissionsController {
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.submissionsService.findOne(+id);
-  }
-
-  @Put(':id')
-  @UpdateSubmissionDecorator()
-  @HttpCode(HttpStatus.OK)
-  update(
-    @Param('id') id: string,
-    @Body() updateSubmissionDto: UpdateSubmissionDto,
-  ) {
-    return this.submissionsService.update(+id, updateSubmissionDto);
-  }
-
-  @Delete(':id')
-  @DeleteSubmissionDecorator()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.submissionsService.remove(+id);
   }
 }

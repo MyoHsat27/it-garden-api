@@ -8,6 +8,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Assignment } from '../../assignments/entities';
+import { Submission } from '../../submissions/entities';
 
 @Entity('medias')
 export class Media {
@@ -16,6 +17,9 @@ export class Media {
 
   @Column()
   url: string;
+
+  @Column()
+  key: string;
 
   @Column({
     type: 'enum',
@@ -47,4 +51,7 @@ export class Media {
 
   @OneToOne(() => Assignment, (assignment) => assignment.media)
   assignment: Assignment;
+
+  @OneToOne(() => Submission, (submission) => submission.media)
+  submission: Submission;
 }

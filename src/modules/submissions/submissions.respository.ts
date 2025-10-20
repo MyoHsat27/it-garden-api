@@ -15,6 +15,10 @@ export class SubmissionsRepository {
     return this.repo.save(entity);
   }
 
+  async save(submission: Submission): Promise<Submission> {
+    return this.repo.save(submission);
+  }
+
   findAll(): Promise<Submission[]> {
     return this.repo.find({ relations: ['assignment', 'enrollment'] });
   }

@@ -46,6 +46,6 @@ export class Admin {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Role, (role) => role.admins)
+  @ManyToOne(() => Role, (role) => role.admins, { eager: true })
   role: Role;
 }

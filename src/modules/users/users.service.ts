@@ -37,7 +37,13 @@ export class UsersService {
   async findById(id: number): Promise<User | null> {
     const user = await this.userRepo.findOne({
       where: { id },
-      relations: ['studentProfile', 'teacherProfile', 'adminProfile'],
+      relations: [
+        'studentProfile',
+        'teacherProfile',
+        'adminProfile',
+        'adminProfile.role',
+        'adminProfile.role.permissions',
+      ],
     });
     return user;
   }

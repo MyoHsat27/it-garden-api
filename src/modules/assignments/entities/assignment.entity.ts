@@ -30,6 +30,9 @@ export class Assignment {
   @Column({ type: 'date', name: 'due_date' })
   dueDate: Date;
 
+  @Column()
+  batchId: number;
+
   @ManyToOne(() => Batch, (batch) => batch.assignments, { onDelete: 'CASCADE' })
   batch: Batch;
 
@@ -40,6 +43,9 @@ export class Assignment {
   })
   @JoinColumn({ name: 'media_id' })
   media?: Media | null;
+
+  @Column({ name: 'media_id', nullable:true })
+  mediaId?: number | null;
 
   @OneToMany(() => Submission, (submission) => submission.assignment)
   submissions: Submission[];

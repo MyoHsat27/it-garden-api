@@ -8,16 +8,17 @@ import { LocalStorageStrategy } from '../../infrastructure/storages/strategies';
 import { MediasModule } from '../medias/medias.module';
 import { BatchesModule } from '../batches/batches.module';
 import { StorageModule } from '../../infrastructure';
+import { Submission } from '../submissions/entities';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Assignment]),
+    TypeOrmModule.forFeature([Assignment, Submission]),
     BatchesModule,
     MediasModule,
     StorageModule,
   ],
   controllers: [AssignmentsController],
   providers: [AssignmentsService, AssignmentsRepository],
-  exports: [AssignmentsService],
+  exports: [AssignmentsService, AssignmentsRepository],
 })
 export class AssignmentsModule {}

@@ -56,10 +56,16 @@ export class Enrollment {
   })
   enrollmentStatus: EnrollmentStatus;
 
+  @Column()
+  studentId: number;
+
   @ManyToOne(() => Student, (student) => student.enrollments, {
     onDelete: 'CASCADE',
   })
   student: Student;
+
+  @Column()
+  batchId: number;
 
   @ManyToOne(() => Batch, (batch) => batch.enrollments, { onDelete: 'CASCADE' })
   batch: Batch;

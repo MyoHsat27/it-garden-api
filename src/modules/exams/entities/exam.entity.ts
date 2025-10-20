@@ -22,6 +22,9 @@ export class Exam {
   @Column({ type: 'date' })
   examDate: Date;
 
+  @Column()
+  classroomId: number;
+
   @ManyToOne(() => Classroom, (classroom) => classroom.batches, {
     onDelete: 'SET NULL',
     nullable: true,
@@ -33,6 +36,9 @@ export class Exam {
 
   @Column('time')
   endTime: string;
+
+  @Column()
+  batchId: number;
 
   @ManyToOne(() => Batch, (batch) => batch.exams)
   batch: Batch;

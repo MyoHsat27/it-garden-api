@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { AttendanceRecordsService } from './attendance-records.service';
 import {
-  CreateAttendanceSessionDto,
   GetTimetableSessionQueryDto,
   TimetableSessionDto,
   UpdateAttendanceRecordDto,
@@ -20,6 +19,10 @@ import {
 import { UpdateAttendanceRecordDecorator } from './decorators';
 import { JwtAuthGuard } from '../auth/guards';
 import { PaginatedResponseDto } from '../../common';
+import { CurrentUser } from '../users/decorators';
+import { RolesPermissionsGuard } from '../auth/guards/role-permission.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/enums';
 
 @Controller('attendances')
 @UseGuards(JwtAuthGuard)
@@ -52,5 +55,13 @@ export class AttendanceRecordsController {
   @HttpCode(HttpStatus.OK)
   update(@Body() dto: UpdateAttendanceRecordDto) {
     return this.service.updateRecord(dto);
+  }
+
+  @Post('records/scan/:token')
+  @UseGuards(RolesPermissionsGuard)
+  @Roles(UserRole.STUDENT)
+  @HttpCode(HttpStatus.OK)
+  markAttendance(@CurrentUser() user: any, @Param('token') token: string) {
+    return this.service.markAttendance(token, user.studentProfile.id);
   }
 }

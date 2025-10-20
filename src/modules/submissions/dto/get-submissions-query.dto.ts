@@ -1,0 +1,44 @@
+import { Type } from 'class-transformer';
+import { IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+
+export class GetSubmissionsQueryDto {
+  @ApiPropertyOptional({ description: 'Search by name' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({ description: 'Search by batch' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  batchId?: number;
+
+  @ApiPropertyOptional({ description: 'Search by teacher' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  teacherId?: number;
+
+  @ApiPropertyOptional({ description: 'Search by enrollment' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  enrollmentId?: number;
+
+  @ApiPropertyOptional({ description: 'Page number (default: 1)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({
+    description: 'Number of items per page (default: 10)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 10;
+}

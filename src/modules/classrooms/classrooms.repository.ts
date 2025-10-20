@@ -90,7 +90,7 @@ export class ClassroomsRepository {
   }
 
   async findById(id: number): Promise<Classroom | null> {
-    return this.repo.findOne({ where: { id } });
+    return this.repo.findOne({ where: { id }, relations: ['batches'] });
   }
 
   async update(classroom: Classroom): Promise<Classroom> {

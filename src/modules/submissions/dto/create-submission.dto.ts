@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsDateString,
-} from 'class-validator';
-import { SubmissionStatus } from '../enums';
+import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
 
 export class CreateSubmissionDto {
   @ApiProperty({ required: false })
@@ -14,34 +7,7 @@ export class CreateSubmissionDto {
   @IsString()
   content?: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  fileUrl?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber()
-  grade?: number;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  feedback?: string;
-
-  @ApiProperty({ enum: SubmissionStatus, default: SubmissionStatus.PENDING })
-  @IsEnum(SubmissionStatus)
-  status: SubmissionStatus;
-
-  @ApiProperty()
-  @IsDateString()
-  submittedAt: Date;
-
-  @ApiProperty()
-  @IsNumber()
-  assignmentId: number;
-
-  @ApiProperty()
-  @IsNumber()
-  enrollmentId: number;
+  assignmentId: string;
 }

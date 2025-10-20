@@ -40,6 +40,7 @@ import { MediasModule } from './modules/medias/medias.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { StudentsModule } from './modules/students/students.module';
 import { CalendarsModule } from './modules/calendars/calendars.module';
+import { ChatsModule } from './modules/chats/chats.module';
 
 @Module({
   imports: [
@@ -111,6 +112,8 @@ import { CalendarsModule } from './modules/calendars/calendars.module';
     PaymentsModule,
 
     CalendarsModule,
+
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [

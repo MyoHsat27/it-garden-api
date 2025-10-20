@@ -17,6 +17,12 @@ export class AttendanceRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  token: string;
+
+  @Column({ type: 'timestamp' })
+  expiresAt: Date;
+
   @ManyToOne(() => Enrollment, (enrollment) => enrollment.attendanceRecords)
   enrollment: Enrollment;
 
