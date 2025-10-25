@@ -2,16 +2,11 @@ import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class GetEnrollmentsQueryDto {
-  @ApiPropertyOptional({ description: 'Search by name' })
+export class GetAnnouncementsQueryDto {
+  @ApiPropertyOptional({ description: 'Search by full name or email' })
   @IsOptional()
   @IsString()
   search?: string;
-
-  @ApiPropertyOptional({ description: 'Payment status' })
-  @IsOptional()
-  @IsString()
-  paymentStatus?: string;
 
   @ApiPropertyOptional({ description: 'Page number (default: 1)' })
   @IsOptional()

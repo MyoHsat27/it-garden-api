@@ -3,6 +3,7 @@ import { Expose, Type } from 'class-transformer';
 import { TeacherResponseDto } from '../../teachers/dto';
 import { BatchResponseDto } from '../../batches/dto';
 import { MediaResponseDto } from '../../medias/dto';
+import { SubmissionResponseDto } from '../../submissions/dto';
 
 export class AssignmentResponseDto {
   @ApiProperty()
@@ -30,10 +31,31 @@ export class AssignmentResponseDto {
   @Type(() => BatchResponseDto)
   batch: BatchResponseDto;
 
+  @ApiProperty({ type: () => SubmissionResponseDto })
+  @Expose()
+  @Type(() => SubmissionResponseDto)
+  submissions: SubmissionResponseDto;
+
   @ApiProperty()
   @Expose()
   @Type(() => MediaResponseDto)
   media: MediaResponseDto;
+
+  @ApiProperty()
+  @Expose()
+  totalRequiredSubmissions: number;
+
+  @ApiProperty()
+  @Expose()
+  currentSubmissionCount: number;
+
+  @ApiProperty()
+  @Expose()
+  pendingSubmissionCount: number;
+
+  @ApiProperty()
+  @Expose()
+  gradedSubmissionCount: number;
 
   @ApiProperty()
   @Expose()

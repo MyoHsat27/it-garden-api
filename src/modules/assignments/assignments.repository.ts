@@ -40,6 +40,7 @@ export class AssignmentsRepository {
 
     const qb = this.repo
       .createQueryBuilder('assignment')
+      .leftJoinAndSelect('assignment.submissions', 'submissions')
       .leftJoinAndSelect('assignment.batch', 'batch')
       .leftJoinAndSelect('batch.teacher', 'teacher')
       .leftJoinAndSelect('batch.course', 'course')
@@ -65,12 +66,34 @@ export class AssignmentsRepository {
 
     const [data, totalItems] = await qb.getManyAndCount();
 
+    const enhancedData = data.map((assignment) => {
+      const totalRequiredSubmissions =
+        assignment.batch?.enrollments?.length || 0;
+
+      const currentSubmissionCount = assignment.submissions?.length || 0;
+
+      const gradedSubmissionCount =
+        assignment.submissions?.filter((s) => s.status === 'graded').length ||
+        0;
+
+      const pendingSubmissionCount =
+        totalRequiredSubmissions - currentSubmissionCount;
+
+      return {
+        ...assignment,
+        totalRequiredSubmissions,
+        currentSubmissionCount,
+        pendingSubmissionCount,
+        gradedSubmissionCount,
+      };
+    });
+
     const totalPages = Math.ceil(totalItems / limit);
     const hasPreviousPage = page > 1;
     const hasNextPage = page < totalPages;
 
     return {
-      data,
+      data: enhancedData,
       page,
       limit,
       totalItems,
@@ -79,78 +102,6 @@ export class AssignmentsRepository {
       hasNextPage,
     };
   }
-
-  // async findWithStudentFilters(
-  //   query: GetAssignmentsQueryDto,
-  // ): Promise<PaginatedResponseDto<Assignment>> {
-  //   const { page = 1, limit = 10, search, studentId } = query;
-  //   const skip = (page - 1) * limit;
-
-  //   const qb = this.repo
-  //     .createQueryBuilder('assignment')
-  //     .leftJoin('assignment.batch', 'batch')
-  //     .leftJoin('batch.teacher', 'teacher')
-  //     .leftJoin('batch.course', 'course')
-  //     .leftJoin('batch.enrollments', 'enrollments')
-  //     .leftJoin('enrollments.student', 'student')
-  //     .leftJoin(
-  //       'assignment.submissions',
-  //       'submissions',
-  //       'submissions.enrollmentId = enrollments.id AND enrollments.studentId = :studentId',
-  //       { studentId },
-  //     )
-
-  //     .select([
-  //       'assignment.id',
-  //       'assignment.title',
-  //       'assignment.description',
-  //       'assignment.startDate',
-  //       'assignment.dueDate',
-  //       'batch.id',
-  //       'batch.name',
-  //       'course.id',
-  //       'course.name',
-  //     ])
-  //     .addSelect('COUNT(submissions.id)', 'submissionCount')
-
-  //     .groupBy('assignment.id')
-  //     .addGroupBy('batch.id')
-  //     .addGroupBy('course.id')
-  //     .orderBy('assignment.id', 'DESC')
-  //     .skip(skip)
-  //     .take(limit);
-
-  //   if (search) {
-  //     qb.andWhere('(assignment.title ILIKE :search)', {
-  //       search: `%${search}%`,
-  //     });
-  //   }
-
-  //   if (studentId) {
-  //     qb.andWhere('student.id = :studentId', { studentId });
-  //   }
-
-  //   const [assignments, totalItems] = await qb.getManyAndCount();
-
-  //   const dataWithFlags = assignments.map((a: any) => ({
-  //     ...a,
-  //     hasSubmission: Number((a as any).submissionCount ?? 0) > 0,
-  //   }));
-
-  //   const totalPages = Math.ceil(totalItems / limit);
-  //   const hasPreviousPage = page > 1;
-  //   const hasNextPage = page < totalPages;
-
-  //   return {
-  //     data: dataWithFlags,
-  //     page,
-  //     limit,
-  //     totalItems,
-  //     totalPages,
-  //     hasPreviousPage,
-  //     hasNextPage,
-  //   };
-  // }
 
   async findWithStudentFilters(
     query: GetAssignmentsQueryDto,

@@ -30,7 +30,7 @@ export class SubmissionResponseDto {
   @Expose()
   submittedAt: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => AssignmentResponseDto })
   @Expose()
   @Type(() => AssignmentResponseDto)
   assignment: AssignmentResponseDto;

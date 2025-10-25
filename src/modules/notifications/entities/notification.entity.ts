@@ -17,7 +17,10 @@ export class Notification {
   recipient: User;
 
   @Column()
-  message: string;
+  title: string;
+
+  @Column('text')
+  body: string;
 
   @Column({ default: false })
   read: boolean;
@@ -29,7 +32,7 @@ export class Notification {
   payload?: any;
 
   @Column({ nullable: true })
-  sourceId?: string;
+  sourceId?: number;
 
   @Column({ type: 'simple-array', nullable: true })
   channels?: NotificationChannel[];

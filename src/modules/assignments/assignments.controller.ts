@@ -93,6 +93,7 @@ export class AssignmentsController {
   remove(@Param('id') id: number) {
     return this.service.remove(id);
   }
+
   @Get('download/:id')
   async downloadAttachment(
     @Param('id') id: number,
@@ -104,8 +105,6 @@ export class AssignmentsController {
     }
 
     const filePath = join(process.cwd(), 'uploads', assignment.media.key);
-    const logger = new Logger('TEST');
-    logger.log(filePath);
     if (!existsSync(filePath)) {
       throw new NotFoundException('File not found');
     }

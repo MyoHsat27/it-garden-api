@@ -41,6 +41,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { StudentsModule } from './modules/students/students.module';
 import { CalendarsModule } from './modules/calendars/calendars.module';
 import { ChatsModule } from './modules/chats/chats.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -114,6 +115,8 @@ import { ChatsModule } from './modules/chats/chats.module';
     CalendarsModule,
 
     ChatsModule,
+
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

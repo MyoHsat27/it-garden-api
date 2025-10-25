@@ -23,7 +23,7 @@ export class EnrollmentsRepository {
   async findWithFilters(
     query: GetEnrollmentsQueryDto,
   ): Promise<PaginatedResponseDto<Enrollment>> {
-    const { page = 1, limit = 10, search } = query;
+    const { page = 1, limit = 10, search, paymentStatus } = query;
     const skip = (page - 1) * limit;
 
     const qb = this.repo
@@ -37,9 +37,15 @@ export class EnrollmentsRepository {
       .take(limit);
 
     if (search) {
-      qb.andWhere('(enrollment.name ILIKE :search)', {
+      qb.andWhere('(student.fullName ILIKE :search)', {
         search: `%${search}%`,
       });
+    }
+
+    if (paymentStatus === 'pending') {
+      qb.andWhere('payment.id IS NULL OR payment.paidAt IS NULL');
+    } else if (paymentStatus === 'paid') {
+      qb.andWhere('payment.id IS NOT NULL AND payment.paidAt IS NOT NULL');
     }
 
     const [data, totalItems] = await qb.getManyAndCount();
@@ -87,6 +93,7 @@ export class EnrollmentsRepository {
   ): Promise<Enrollment | null> {
     return this.repo.findOne({
       where: { student: { id: studentId }, batch: { id: batchId } },
+      relations: ['student', 'batch'],
     });
   }
 }

@@ -17,6 +17,7 @@ import { CoursesRepository } from '../courses/courses.repository';
 import { Timetable } from '../timetables/entities';
 import { User } from '../users/entities';
 import { UserRole } from '../users/enums';
+import { BatchStatus } from './enums';
 
 @Injectable()
 export class BatchesService {
@@ -87,6 +88,10 @@ export class BatchesService {
       description: dto.description,
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
+      status:
+        new Date() > new Date(dto.startDate)
+          ? BatchStatus.ACTIVE
+          : BatchStatus.FUTURE,
       course,
       teacher,
       classroom,

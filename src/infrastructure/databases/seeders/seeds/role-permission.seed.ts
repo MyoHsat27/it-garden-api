@@ -15,6 +15,7 @@ export default class RolePermissionSeeder implements Seeder {
       { subject: 'students', action: 'update' },
       { subject: 'students', action: 'delete' },
       { subject: 'enrollments', action: 'view' },
+      { subject: 'enrollments', action: 'create' },
       { subject: 'enrollments', action: 'add-payment' },
       { subject: 'teachers', action: 'view' },
       { subject: 'teachers', action: 'create' },

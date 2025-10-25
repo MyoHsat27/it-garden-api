@@ -41,7 +41,7 @@ export class PaymentsRepository {
       .take(limit);
 
     if (search) {
-      qb.andWhere('(payment.name ILIKE :search)', {
+      qb.andWhere('(course.name ILIKE :search)', {
         search: `%${search}%`,
       });
     }

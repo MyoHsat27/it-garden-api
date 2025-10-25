@@ -3,40 +3,52 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  Put,
+  Req,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { AnnouncementsService } from './announcements.service';
-import { CreateAnnouncementDto } from './dto/create-announcement.dto';
-import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
+import {
+  AnnouncementResponseDto,
+  CreateAnnouncementDto,
+  GetAnnouncementsQueryDto,
+} from './dto';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../auth/guards';
+import { PaginatedResponseDto } from '../../common';
 
 @Controller('announcements')
+@UseGuards(JwtAuthGuard)
 export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Post()
-  create(@Body() createAnnouncementDto: CreateAnnouncementDto) {
-    return this.announcementsService.create(createAnnouncementDto);
+  @HttpCode(HttpStatus.CREATED)
+  create(
+    @Req() req: Request,
+    @Body() createAnnouncementDto: CreateAnnouncementDto,
+  ) {
+    return this.announcementsService.create(
+      createAnnouncementDto,
+      req?.user as any,
+    );
   }
 
-  @Get()
-  findAll() {
-    return this.announcementsService.findAll();
+  @Get('filtered')
+  @HttpCode(HttpStatus.OK)
+  async findAllAnnouncementsWithFilters(
+    @Query() query: GetAnnouncementsQueryDto,
+  ): Promise<PaginatedResponseDto<AnnouncementResponseDto>> {
+    return this.announcementsService.findAllAnnouncementsWithFilters(query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.announcementsService.findOne(+id);
-  }
-
-  @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAnnouncementDto: UpdateAnnouncementDto,
-  ) {
-    return this.announcementsService.update(+id, updateAnnouncementDto);
   }
 
   @Delete(':id')

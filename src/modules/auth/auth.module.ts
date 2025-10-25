@@ -14,6 +14,7 @@ import { AdminsModule } from '../admins/admins.module';
 import { UsersModule } from '../users/users.module';
 import { StudentsModule } from '../students/students.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { EmailModule } from '../../infrastructure/queues/email';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     TeachersModule,
     StudentsModule,
     AdminsModule,
-    NotificationsModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [

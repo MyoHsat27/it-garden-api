@@ -86,7 +86,15 @@ export class BatchesRepository {
   async findById(id: number): Promise<Batch | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['course', 'teacher', 'classroom', 'enrollments'],
+      relations: [
+        'course',
+        'teacher',
+        'classroom',
+        'timetables',
+        'timetables.timeSlot',
+        'enrollments',
+        'enrollments.student',
+      ],
     });
   }
 

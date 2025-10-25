@@ -10,6 +10,7 @@ import { User } from '../users/entities';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CryptoHelper } from '../../common';
+import { EmailProducer } from '../../infrastructure/queues/email';
 
 @Injectable()
 export class VerificationService {
@@ -17,28 +18,24 @@ export class VerificationService {
 
   constructor(
     private readonly usersService: UsersService,
-    private readonly notificationService: NotificationsService,
+    private readonly emailProducer: EmailProducer,
   ) {}
 
   async sendEmailVerification(user: User): Promise<{ message: string }> {
     const [generatedOtp, hashedOtp] =
       await CryptoHelper.generateAndHashOtp6Figures();
 
-    if (user.isEmailVerified === true) {
+    if (user.isEmailVerified === true)
       throw new BadRequestException(
         'This email address has already been verified.',
       );
-    }
 
     await this.usersService.update(user.id, {
       verifyEmailToken: hashedOtp,
       verifyEmailExpires: new Date(Date.now() + 3600000),
     });
 
-    await this.notificationService.sendVerificationEmail(
-      user.email,
-      generatedOtp,
-    );
+    await this.sendVerificationEmail(user.email, generatedOtp);
 
     return { message: 'OTP Code Has Been Sent' };
   }
@@ -65,17 +62,15 @@ export class VerificationService {
       throw new NotFoundException('User not found.');
     }
 
-    if (!user.verifyEmailToken || user.verifyEmailExpires === null) {
+    if (!user.verifyEmailToken || user.verifyEmailExpires === null)
       throw new NotFoundException(
         'No pending email verification found. Please request a new OTP.',
       );
-    }
 
-    if (new Date(Date.now()) > user.verifyEmailExpires) {
+    if (new Date(Date.now()) > user.verifyEmailExpires)
       throw new BadRequestException(
         'Your OTP has expired. Please request a new one.',
       );
-    }
 
     const isOtpValid = await CryptoHelper.validateOtp(
       otp,
@@ -89,5 +84,9 @@ export class VerificationService {
     }
 
     return user;
+  }
+
+  async sendVerificationEmail(to: string, otp: string): Promise<void> {
+    await this.emailProducer.sendVerificationEmail(to, otp);
   }
 }

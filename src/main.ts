@@ -27,6 +27,7 @@ async function bootstrap() {
       : [],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    exposedHeaders: ['Content-Disposition'],
   };
 
   app.setGlobalPrefix('api/v1');

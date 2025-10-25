@@ -36,4 +36,55 @@ export class EmailService {
       throw error;
     }
   }
+
+  async sendForgotPassword(to: string, token: string): Promise<void> {
+    const frontendResetLink = this.configService.get<string>(
+      'FRONTEND_RESET_PASSWORD',
+    );
+    const subject = 'Your Reset Link';
+    const html = `<p>Your password reset link is: <strong>${frontendResetLink}?rt=${token}</strong></p>`;
+
+    try {
+      await this.transporter.sendMail({
+        from: this.configService.get<string>('EMAIL_FROM'),
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(
+        `Reset password link email has been sent successfully to ${to}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send reset password link email to ${to}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async sendMail({
+    to,
+    subject,
+    html,
+    text,
+  }: {
+    to: string;
+    subject: string;
+    html: string;
+    text: string;
+  }): Promise<void> {
+    try {
+      await this.transporter.sendMail({
+        from: this.configService.get<string>('EMAIL_FROM'),
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Email has been sent successfully to ${to}`);
+    } catch (error) {
+      this.logger.error(`Failed to send email to ${to}`, error);
+      throw error;
+    }
+  }
 }

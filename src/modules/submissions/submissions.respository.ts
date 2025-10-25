@@ -36,14 +36,14 @@ export class SubmissionsRepository {
   findById(id: number) {
     return this.repo.findOne({
       where: { id },
-      relations: ['enrollment', 'enrollment.student', 'assignment'],
+      relations: ['enrollment', 'enrollment.student', 'assignment', 'media'],
     });
   }
 
   findAllByAssignment(assignmentId: number) {
     return this.repo.find({
       where: { assignment: { id: assignmentId } },
-      relations: ['enrollment', 'enrollment.student'],
+      relations: ['enrollment', 'enrollment.student', 'media'],
       order: { createdAt: 'ASC' },
     });
   }

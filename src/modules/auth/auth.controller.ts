@@ -16,12 +16,14 @@ import {
   RefreshTokenDecorator,
   VerifyEmailSetupDecorator,
 } from './decorators';
-import { Throttle } from '@nestjs/throttler';
 import { VerificationService } from './verification.service';
-import { ValidateOtpDto } from './dto';
+import { ChangePasswordDto, ValidateOtpDto } from './dto';
 import { AuthHelper } from './helpers';
 import { Request, Response } from 'express';
 import { JwtAuthGuard, LocalAuthGuard, RefreshTokenGuard } from './guards';
+import { PasswordService } from './password.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +31,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly authHelper: AuthHelper,
     private readonly verificationService: VerificationService,
+    private readonly passwordService: PasswordService,
   ) {}
 
   private async handleAuthResponse(
@@ -75,8 +78,32 @@ export class AuthController {
     );
   }
 
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgetPassword(@Body() dto: ForgotPasswordDto) {
+    return await this.passwordService.forgotPassword(dto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: ResetPasswordDto,
+  ) {
+    return this.handleAuthResponse(
+      res,
+      this.passwordService.resetPassword(dto),
+    );
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
+    return await this.passwordService.changePassword(req.user as any, dto);
+  }
+
   @Post('verify-email')
-  @Throttle({ default: { limit: 1, ttl: 50000 } })
   @UseGuards(JwtAuthGuard)
   @VerifyEmailSetupDecorator()
   @HttpCode(HttpStatus.OK)

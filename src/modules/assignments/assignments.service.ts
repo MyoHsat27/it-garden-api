@@ -129,21 +129,6 @@ export class AssignmentsService {
     );
   }
 
-  // async findAllStudentAssignmentsWithFilters(query: GetAssignmentsQueryDto) {
-  //   const result = await this.repository.findWithStudentFilters(query);
-
-  //   const data = result.data.map((a) =>
-  //     plainToInstance(StudentAssignmentResponseDto, a),
-  //   );
-
-  //   return new PaginatedResponseDto(
-  //     data,
-  //     result.totalItems,
-  //     result.page,
-  //     result.limit,
-  //   );
-  // }
-
   async findAllStudentAssignmentsWithFilters(query: GetAssignmentsQueryDto) {
     const result = await this.repository.findWithStudentFilters(query);
 

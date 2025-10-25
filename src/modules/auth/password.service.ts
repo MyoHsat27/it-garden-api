@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from './dto/change-password.dto';
 import {
   Injectable,
   NotFoundException,
@@ -6,9 +7,13 @@ import {
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { TokenService } from './token.service';
-import { ChangePasswordDto } from './dto';
 import { UsersService } from '../users/users.service';
 import { CryptoHelper } from '../../common';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { User } from '../users/entities';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { EmailProducer } from '../../infrastructure/queues/email';
 
 @Injectable()
 export class PasswordService {
@@ -17,14 +22,16 @@ export class PasswordService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
+    private readonly emailProducer: EmailProducer,
   ) {}
 
   async changePassword(
-    userId: number,
+    user: User,
     changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
+    const logger = new Logger('TEST');
+    const existingUser = await this.usersService.findById(user.id);
+    if (!existingUser) {
       throw new NotFoundException('User not found');
     }
 
@@ -32,19 +39,19 @@ export class PasswordService {
 
     const isValidOldPassword = await CryptoHelper.validatePassword(
       oldPassword,
-      user.password ?? '',
+      existingUser.password ?? '',
     );
     if (!isValidOldPassword) {
       throw new BadRequestException('Old password is incorrect');
     }
+    logger.log(changePasswordDto);
+    existingUser.password = await CryptoHelper.hashPassword(newPassword);
 
-    user.password = await CryptoHelper.hashPassword(newPassword);
-
-    await this.usersService.updateCurrentUser(user.id, user);
+    await this.usersService.updateCurrentUser(existingUser.id, existingUser);
   }
 
-  async forgotPassword(email: string): Promise<void> {
-    const user = await this.usersService.findByEmail(email);
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmail(dto.email);
     if (!user) {
       throw new NotFoundException(
         'User with this email address was not found.',
@@ -58,19 +65,23 @@ export class PasswordService {
       passwordResetCode: resetToken,
       passwordResetExpires: resetTokenExpiry,
     });
+
+    await this.sendForgotPasswordEmail(user.email, resetToken);
+
+    return { message: 'Password reset link has been sent' };
   }
 
-  async resetPassword(resetToken: string, newPassword: string) {
+  async resetPassword(dto: ResetPasswordDto) {
+    const { resetToken, newPassword } = dto;
     const user = await this.usersService.findByResetToken(resetToken);
     if (
       !user ||
       !user.passwordResetExpires ||
       user.passwordResetExpires < new Date()
-    ) {
+    )
       throw new BadRequestException(
         'Password reset token is invalid or has expired.',
       );
-    }
 
     user.password = await CryptoHelper.hashPassword(newPassword);
     user.passwordResetCode = null;
@@ -85,5 +96,9 @@ export class PasswordService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async sendForgotPasswordEmail(to: string, token: string): Promise<void> {
+    await this.emailProducer.sendForgotPasswordEmail(to, token);
   }
 }

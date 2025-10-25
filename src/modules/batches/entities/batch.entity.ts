@@ -37,7 +37,7 @@ export class Batch {
   @Column({
     type: 'enum',
     enum: BatchStatus,
-    default: BatchStatus.FUTURE,
+    default: BatchStatus.ACTIVE,
   })
   status: BatchStatus;
 

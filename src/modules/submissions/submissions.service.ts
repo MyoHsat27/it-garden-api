@@ -2,6 +2,7 @@ import { EnrollmentsRepository } from './../enrollments/enrollments.repository';
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { SubmissionsRepository } from './submissions.respository';
@@ -37,8 +38,8 @@ export class SubmissionsService {
     if (!assignment) throw new NotFoundException('Assignment not found');
 
     const enrollment = await this.enrollmentsRepository.findByStudentAndBatch(
-      assignment.batch.id,
       studentId,
+      assignment.batch.id,
     );
     if (!enrollment) throw new NotFoundException('Enrollment not found');
 

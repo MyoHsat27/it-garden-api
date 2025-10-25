@@ -22,6 +22,7 @@ export class Announcement {
 
   @ManyToOne(() => Batch, (batch) => batch.announcements, { nullable: true })
   batch?: Batch;
+
   @Column({ type: 'simple-array', nullable: true })
   channels: NotificationChannel[];
 
