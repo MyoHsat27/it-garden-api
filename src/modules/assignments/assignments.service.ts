@@ -10,11 +10,19 @@ import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { plainToInstance } from 'class-transformer';
 import { AssignmentResponseDto, GetAssignmentsQueryDto } from './dto';
-import { MediaType, PaginatedResponseDto, validateArchive } from '../../common';
+import {
+  MediaType,
+  NotificationChannel,
+  NotificationType,
+  PaginatedResponseDto,
+  validateArchive,
+} from '../../common';
 import { BatchesRepository } from '../batches/batches.repository';
 import { MediasRepository } from '../medias/medias.repository';
 import { StorageService } from '../../infrastructure';
 import { StudentAssignmentResponseDto } from './dto/student-assignment-response.dto';
+import { Assignment } from './entities';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AssignmentsService {
@@ -23,6 +31,7 @@ export class AssignmentsService {
     private readonly batchesRepository: BatchesRepository,
     private readonly mediasRepository: MediasRepository,
     private readonly storageService: StorageService,
+    private readonly notificationService: NotificationsService,
   ) {}
 
   async createAssignment(dto: CreateAssignmentDto, file?: Express.Multer.File) {
@@ -63,7 +72,59 @@ export class AssignmentsService {
 
     const updatedAssignment = await this.repository.save(assignment);
 
+    await this.notifyBatchAssignment(batch.id, updatedAssignment);
     return plainToInstance(AssignmentResponseDto, updatedAssignment);
+  }
+
+  private async notifyBatchAssignment(batchId: number, assignment: Assignment) {
+    const logger = new Logger('Assignment notification');
+    const batch = await this.batchesRepository.findById(batchId);
+
+    if (!batch) throw new NotFoundException('Batch not found for notification');
+
+    const recipients: User[] = [];
+
+    if (batch.teacher?.user) recipients.push(batch.teacher.user);
+    const studentUsers = (batch.enrollments || [])
+      .map((e) => e.student.user)
+      .filter(Boolean);
+    recipients.push(...studentUsers);
+
+    const uniqueRecipients = [
+      ...new Map(recipients.map((u) => [u.id, u])).values(),
+    ];
+
+    const payload = {
+      assignmentId: assignment.id,
+      batchId: batchId,
+      title: assignment.title,
+      dueDate: assignment.dueDate,
+    };
+
+    const channels = [NotificationChannel.WEB];
+
+    await Promise.all(
+      uniqueRecipients.map(async (user) => {
+        try {
+          await this.notificationService.createForUser(user, {
+            title: `New Assignment: ${assignment.title}`,
+            body: `A new assignment has been posted for your batch.`,
+            type: NotificationType.ASSIGNMENT_CREATED,
+            channels,
+            payloadData: payload,
+            sourceId: assignment.id,
+          });
+        } catch (err) {
+          logger.warn(
+            `Failed to create assignment notification for user ${user.id}: ${err.message}`,
+          );
+        }
+      }),
+    );
+
+    logger.log(
+      `Assignment ${assignment.id} notification sent to ${uniqueRecipients.length} recipients.`,
+    );
   }
 
   async updateAssignment(

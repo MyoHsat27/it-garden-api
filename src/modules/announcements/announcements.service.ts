@@ -104,7 +104,6 @@ export class AnnouncementsService {
 
     await Promise.all(
       uniqueRecipients.map(async (user) => {
-        this.logger.log(user);
         if (channels.includes(NotificationChannel.WEB)) {
           this.logger.log('INSIDE WEB');
           try {

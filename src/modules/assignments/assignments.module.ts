@@ -4,11 +4,11 @@ import { AssignmentsController } from './assignments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Assignment } from './entities';
 import { AssignmentsRepository } from './assignments.repository';
-import { LocalStorageStrategy } from '../../infrastructure/storages/strategies';
 import { MediasModule } from '../medias/medias.module';
 import { BatchesModule } from '../batches/batches.module';
 import { StorageModule } from '../../infrastructure';
 import { Submission } from '../submissions/entities';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,6 +16,7 @@ import { Submission } from '../submissions/entities';
     BatchesModule,
     MediasModule,
     StorageModule,
+    NotificationsModule,
   ],
   controllers: [AssignmentsController],
   providers: [AssignmentsService, AssignmentsRepository],

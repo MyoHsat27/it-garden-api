@@ -89,11 +89,13 @@ export class BatchesRepository {
       relations: [
         'course',
         'teacher',
+        'teacher.user',
         'classroom',
         'timetables',
         'timetables.timeSlot',
         'enrollments',
         'enrollments.student',
+        'enrollments.student.user',
       ],
     });
   }
